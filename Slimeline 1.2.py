@@ -8,7 +8,7 @@ class Netzplaner:
         
         print("Slimeline wird geladen!")
         self.master = master
-        self.master.title("Slimeline 1.1")
+        self.master.title("Slimeline 1.2")
         self.master.bell()
         
         self.canvasBG = "white"

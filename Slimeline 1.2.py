@@ -1,14 +1,24 @@
 import tkinter as tk
 from tkinter import colorchooser, simpledialog, messagebox
 import pickle
+from PIL import Image, ImageTk
+import requests
+
 
 
 class Netzplaner:
     def __init__(self, master):
-        
-        print("Slimeline wird geladen!")
+        image_url = "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/c/cc/Schleim.png/revision/latest/scale-to-width-down/150?cb=20200403150614.png"
+        response = requests.get(image_url)
+        with open("schleim.png", "wb") as f:
+            f.write(response.content)
+        from PIL import Image
+        print("Slimeline wird geladen")
         self.master = master
         self.master.title("Slimeline 1.2")
+        self.image = Image.open("schleim.png")
+        self.image = ImageTk.PhotoImage(self.image)
+        self.master.iconphoto(True, self.image)
         self.master.bell()
         
         self.canvasBG = "white"
@@ -48,18 +58,18 @@ class Netzplaner:
         self.save_button = tk.Button(self.master, text="Speichern/Laden", command=self.saveOrLoad)
         self.save_button.pack()
         
-
+        
         self.build_mode_button = tk.Button(self.master, text="Bau-Modus deaktivieren", command=self.toggle_build_mode)
         self.build_mode_button.pack()
         
         options = tk.Button(self.master, text="Optionen", command=self.options)
-        options.place(anchor="w", y=1965, x=30)
+        options.pack(anchor="w")
 
         self.line_color = "green"
         
         self.arrow = tk.Frame(self.master, relief="solid", borderwidth=5)
         self.arrow.pack(side=tk.RIGHT)
-
+        
         self.up_button = tk.Button(self.arrow, text="↑", command=lambda: self.move_canvas(0, -10))
         self.up_button.pack(side=tk.RIGHT)
         self.down_button = tk.Button(self.arrow, text="↓", command=lambda: self.move_canvas(0, 10))
@@ -69,7 +79,7 @@ class Netzplaner:
         self.right_button = tk.Button(self.arrow, text="→", command=lambda: self.move_canvas(10, 0))
         self.right_button.pack(side=tk.RIGHT)
         
-
+        self.WASD = False
 
         self.routebutton = tk.Button(self.master, text="Routenplaner öffnen", command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
         self.routebutton.pack(side=tk.LEFT)
@@ -78,27 +88,42 @@ class Netzplaner:
         self.master.bind("<Down>", lambda event: self.move_canvas(0, 10))
         self.master.bind("<Left>", lambda event: self.move_canvas(-10, 0))
         self.master.bind("<Right>", lambda event: self.move_canvas(10, 0))
-        #self.master.bind("<W>", lambda event: self.move_canvas(0, -10))
-        #self.master.bind("<A>", lambda event: self.move_canvas(-10, 0))
-        #self.master.bind("<S>", lambda event: self.move_canvas(0, 10))
-        #self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
+        if self.WASD:
+
+            self.master.bind("<W>", lambda event: self.move_canvas(0, -10))
+            self.master.bind("<A>", lambda event: self.move_canvas(-10, 0))
+            self.master.bind("<S>", lambda event: self.move_canvas(0, 10))
+            self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
         
         print("Das inizialisieren von Slimeline war erfolgreich!")
     def setOptions(self, canvasBG, uiBG):
+        if canvasBG == "":
+
+            canvasBG = colorchooser.askcolor(title="Hintergrundfarbe wählen")
+            if uiBG[1]:
+            
+                self.canvas.configure(bg=f"{canvasBG[1]}")
+                self.canvas.configure(bg=f"{canvasBG[1]}")
+            
+        elif uiBG == "":
+            uiBG = colorchooser.askcolor(title="Hintergrundfarbe wählen")
+            if uiBG[1]:
+            
+                self.master.configure(bg=f"{uiBG[1]}")
+                self.build_line.configure(bg=f"{uiBG[1]}")
+            if uiBG == "black":
+                        self.left_button.config(bg="black", fg="white")
         
-        
-        self.canvasBG = canvasBG
         messagebox.showinfo("Information", f"""Der Hintergrund des
         Netzplans wurde auf
          '{canvasBG}' gesetzt!""")
         self.master.update()
        
          
-        self.master.configure(bg=f"{uiBG}")
-        self.build_line.configure(bg=f"{uiBG}")
         
-        if uiBG == "black":
-            self.left_button.config(bg="black", fg="white")
+        #self.build_line.configure(bg=f"{uiBG}")
+        
+        
     def options(self):
         settings = tk.Toplevel(self.master)
         
@@ -106,21 +131,20 @@ class Netzplaner:
         settings.title("Einstellungen")
         graphical = tk.LabelFrame(settings, text="Graphische Einstellungen", relief="solid", borderwidth=5)
         graphical.grid(row=0, column=0)
-        canvasbgEntry = tk.Entry(graphical, width=10)
+        canvasbgEntry = tk.Button(graphical, text="Bestimmen", command=lambda uiBG="bla", canvasBG="": self.setOptions(uiBG="bla", canvasBG=""))
         canvasbgEntry.grid(row=0, column=1)
-        canvasbgLabel = tk.Label(graphical, text="Hintergrund des Plans:")
+        canvasbgLabel = tk.Label(graphical, text="Hintergrund des Plans bestimmen:")
         
         
         canvasbgLabel.grid(row=0, column=0)
-        canvasbgEntry.insert(0, self.canvasBG)
-        uiLabel = tk.Label(graphical, text="Hintergrund der Benutzeroberfläche:")
+        
+        uiLabel = tk.Label(graphical, text="Hintergrund der Benutzeroberfläche bestimmen:")
         uiLabel.grid(row=1, column=0)
-        uiEntry = tk.Entry(graphical,  width=10)
+        uiEntry = tk.Button(graphical, text="Bestimmen", command=lambda uiBG="", canvasBG="bla": self.setOptions(uiBG="", canvasBG="bla"))
         uiEntry.grid(row=1, column=1)
         
         
-        confirmgraphical = tk.Button(graphical, text="Graphisches Bestätigen", command=lambda: self.setOptions(canvasBG=canvasbgEntry.get(), uiBG=uiEntry.get()))
-        confirmgraphical.grid(row=10, column=1)
+       
     def saveOrLoad(self):
         Auswahl = tk.Toplevel(self.master)
         Auswahl.title("Auswahl zum Speichern oder Laden")
@@ -330,7 +354,7 @@ class Netzplaner:
             with open("Bau " + filename, "wb") as build:
                 pickle.dump(self.bau, build)
             messagebox.showinfo("Gespeichert", f"Netzplan wurde als '{filename}' gespeichert.")
-
+            
     def load_plan(self):
         filename = simpledialog.askstring("Laden", """Name der Datei, die geladen werden soll:
             """)
@@ -351,6 +375,7 @@ class Netzplaner:
             except FileNotFoundError:
                 messagebox.showerror("Fehler", f"Datei 'Bau {filename}' wurde nicht gefunden.")
                 self.bau = {}  # Notfalls leeren, aber weitermachen
+            
 
             self.draw_lines()  # Jetzt korrekt nach dem Laden
             messagebox.showinfo("Geladen", f"Netzplan '{filename}' wurde geladen.\n\nStationen:\n{self.stations}")
@@ -464,8 +489,8 @@ class Netzplaner:
         messagebox.showinfo("Umbenannt", f"Station '{station}' wurde zu '{new}' umbenannt.")
 
     def confirmDeletion(self, station):
-        answer = simpledialog.askstring("Bestätigung", f'Schreibe "ok" oder "OK" in das Textfeld, um "{station}" zu löschen!')
-        if answer and answer.lower() == "ok":
+        answer = messagebox.askquestion("Bestätigung", f'Willst du "{station}" löschen')
+        if answer == "yes":
             self.delete_station(station)
             messagebox.showinfo("Gelöscht", f'Station "{station}" wurde gelöscht.')
         else:

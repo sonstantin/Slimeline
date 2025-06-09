@@ -254,16 +254,21 @@ class Netzplaner:
         for x, y, name in self.current_line:
             if name not in used_points:
                 self.current_line.remove((x, y, name))
-
     def add_station(self, event):
         if self.build_mode:
             x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             name = self.entry.get()
             self.entry.delete(0, "end")
+            
             if name not in self.stations:
+                if name == "":
+                    proceed = messagebox.askyesno("Bestätigen", "Willst du wirklich eine Station ohne Namen erstellen?")
+                    if proceed == False:
+                        return
                 self.stations[name] = (x, y)
                 self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black")
                 print(f"Station wird erstellt: {name!r}")
+                
                 self.canvas.create_text(x-15, y, text=name, anchor=tk.E, tags=name)
             self.current_line.append((x, y, name))
 

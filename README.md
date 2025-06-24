@@ -14,7 +14,7 @@ Stationen löschen,
 Bau Modus Aktivieren oder deaktivieren,
 Bauprojekte starten und beenden, Liste aller Stationen mit Suche, Liste aller Linien, Linien löschen
 
-Jetzt auch mit Tastenkombinationen:
+*Jetzt auch mit Tastenkombinationen*:
 Escape: Beenden,
 Strg+S: Speichern,
 Strg+O: Laden,

@@ -12,7 +12,7 @@ Routen finden,
 Stationen umbenennen,
 Stationen löschen,
 Bau Modus Aktivieren oder deaktivieren,
-Bauprojekte starten und beenden, Liste aller Stationen mit Suche, Liste aller Linien, Linien löschen
+Bauprojekte starten und beenden, Liste aller Stationen mit Suche, Liste aller Linien, Linien löschen, Die Breite der Linien festlegen
 
 *Jetzt auch mit Tastenkombinationen*:
 Escape: Beenden,

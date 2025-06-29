@@ -3,7 +3,7 @@ Ein Netzplaner, bei dem man eigene Netzwerke aufbauen kann.
 
 Version: 2.2
 
-Features:
+*Features:*
 
 Linienfarbe wählen,
 Stationen Namen geben,

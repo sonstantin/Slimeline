@@ -19,7 +19,7 @@ class Netzplaner:
         from PIL import Image
         print("Slimeline wird geladen")
         self.master = master
-        self.master.title("Slimeline 2.1")
+        self.master.title("Slimeline 2.2")
         self.image = Image.open("schleim.png")
         self.image = ImageTk.PhotoImage(self.image)
         self.master.iconphoto(True, self.image)
@@ -100,6 +100,16 @@ class Netzplaner:
             self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
         
         print("Das inizialisieren von Slimeline war erfolgreich!")
+                self.master.bind("<Escape>", self.exit)
+        self.master.bind("<Control-s>", self.save_plan)
+        self.master.bind("<Control-o>", self.load_plan)
+        self.master.bind("<Shift-Return>", self.create_line)
+        self.master.bind("<Shift-space>", self.showListOfAllStations)
+        self.master.bind("<Control-space>", self.showListOfConnectionsToDelete)
+        self.master.bind("<Control-u>", self.add_intermediate_stop_prompt)
+        self.master.bind("<Alt-c>", self.choose_color)
+        self.master.bind("<Control-b>", self.toggle_build_mode)
+        self.master.bind("<Control-r>", lambda start="", stop="":self.open_route_planner_window(start="", stop=""))
     def setOptions(self, canvasBG, uiBG, width):
         if canvasBG == "":
         

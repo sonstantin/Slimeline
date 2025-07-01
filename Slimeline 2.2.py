@@ -49,7 +49,8 @@ class Netzplaner:
         self.entry = tk.Entry(self.build_line)
         self.entry.pack(side=tk.TOP, fill=tk.X)
 
-        self.canvas.bind("<Button-1>", self.add_station)
+        self.canvas.bind("<Button-1>", lambda event: self.add_station(event, komplex=False))
+
 
         self.create_line_button = tk.Button(self.build_line, text="Linie erstellen", command=self.create_line)
         self.create_line_button.pack()
@@ -100,7 +101,7 @@ class Netzplaner:
             self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
         
         print("Das inizialisieren von Slimeline war erfolgreich!")
-                self.master.bind("<Escape>", self.exit)
+        self.master.bind("<Escape>", self.exit)
         self.master.bind("<Control-s>", self.save_plan)
         self.master.bind("<Control-o>", self.load_plan)
         self.master.bind("<Shift-Return>", self.create_line)
@@ -110,6 +111,7 @@ class Netzplaner:
         self.master.bind("<Alt-c>", self.choose_color)
         self.master.bind("<Control-b>", self.toggle_build_mode)
         self.master.bind("<Control-r>", lambda start="", stop="":self.open_route_planner_window(start="", stop=""))
+        self.master.bind("<Control-k>", self.komplexlinecreation)
     def setOptions(self, canvasBG, uiBG, width):
         if canvasBG == "":
         
@@ -142,6 +144,8 @@ class Netzplaner:
          
         
         #self.build_line.configure(bg=f"{uiBG}")
+    def exit(self, event=None):
+        self.master.destroy()
         
         
     def options(self):
@@ -179,7 +183,7 @@ class Netzplaner:
         LoadButton = tk.Button(Auswahl, text="Laden", command=self.load_plan)
         LoadButton.pack()
         
-    def open_route_planner_window(self, start, stop):
+    def open_route_planner_window(self, start, stop, event=None):
         window = tk.Toplevel(self.master)
         window.title("Routenplaner")
 
@@ -305,13 +309,39 @@ class Netzplaner:
         for x, y, name in self.current_line:
             if name not in used_points:
                 self.current_line.remove((x, y, name))
+    def komplexlinecreation(self, event=None):
+        print("Komplexe Stationserstellung")
 
-    def add_station(self, event):
+        komplex = tk.Toplevel(self.master)
+        komplex.title("Komplexe Stationserstellung")
+        
+        nameL = tk.Label(komplex, text="Hier soll der Name der Station eingegeben werden:")
+        nameL.pack()
+
+        self.nameE = tk.Entry(komplex, width=20)
+        self.nameE.pack()
+
+        proceed = tk.Button(komplex, text="Weiter ->", command=self.komplex)
+        proceed.pack()
+
+    def komplex(self):
+        self.x = simpledialog.askinteger("X-Koordinate", "Was soll die x Koordinate, also die Koordinate von links nach rechts sein?")
+        self.y = simpledialog.askinteger("Y-Koordinate", "Was soll die y Koordinate, also die Koordinate von oben nach unten sein?")
+        if self.x and self.y:
+            self.add_station(komplex=True)
+    def add_station(self, event=None, komplex=False):
+        if name == "/komplex":
+            self.komplexlinecreation()
         if self.build_mode:
-            x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
-            name = self.entry.get()
-            self.entry.delete(0, "end")
-            
+            if komplex == False:
+                x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+                name = self.entry.get()
+                self.entry.delete(0, "end")
+            elif komplex == True:
+                x = self.x
+                y = self.y
+                name = self.nameE.get()
+
             if name not in self.stations:
                 if name == "":
                     proceed = messagebox.askyesno("Bestätigen", """Willst du wirklich eine
@@ -342,7 +372,7 @@ class Netzplaner:
             coords = [(x, y) for x, y, _ in points]
             self.canvas.create_line(coords, fill=color)
 
-    def showListOfConnectionsToDelete(self):
+    def showListOfConnectionsToDelete(self, event=None):
         if not self.lines:
             messagebox.showinfo("Keine Verbindungen", "Es sind keine Verbindungen vorhanden.")
             return
@@ -383,13 +413,15 @@ class Netzplaner:
         
 
 
-    def add_intermediate_stop_prompt(self):
+    def add_intermediate_stop_prompt(self, event=None):
         if self.build_mode:
             station = simpledialog.askstring("Umsteigemöglichkeit hinzufügen", "Bitte geben Sie den Namen der Station ein:")
             if station:
                 self.add_intermediate_stop(station)
 
-    def create_line(self):
+
+    
+    def create_line(self, event=None):
         if len(self.current_line) > 1:
             name = simpledialog.askstring("Name", "Wie soll der Name der Linie lauten?")
             for Line in self.lines:
@@ -406,12 +438,12 @@ class Netzplaner:
             self.lines.append((line, self.current_line, self.line_color))
             self.current_line = []
 
-    def choose_color(self):
+    def choose_color(self, event=None):
         color = colorchooser.askcolor(title="Linienfarbe wählen")
         if color[1]:
             self.line_color = color[1]
 
-    def save_plan(self):
+    def save_plan(self, event=None):
         self.remove_unused_points()
         filename = simpledialog.askstring("Speichern unter", """Dateiname für den Netzplan eingeben: 
         (Merken Sie
@@ -425,7 +457,7 @@ class Netzplaner:
                 pickle.dump(self.bau, build)
             messagebox.showinfo("Gespeichert", f"Netzplan wurde als '{filename}' gespeichert.")
             
-    def load_plan(self):
+    def load_plan(self, event=None):
         filename = simpledialog.askstring("Laden", """Name der Datei, die geladen werden soll:
             """)
             
@@ -474,14 +506,14 @@ class Netzplaner:
     def start_line_creation(self, name):
         self.current_line = [(x, y, n) for x, y, n in self.current_line if n == name]
 
-    def toggle_build_mode(self):
+    def toggle_build_mode(self, event=None):
         self.build_mode = not self.build_mode
         self.build_mode_button.config(text="Bau-Modus deaktivieren" if self.build_mode else "Bau-Modus aktivieren")
 
     def move_canvas(self, dx, dy):
         self.canvas.xview_scroll(dx, "units")
         self.canvas.yview_scroll(dy, "units")
-    def showListOfAllStations(self):
+    def showListOfAllStations(self, event=None):
         self.list = tk.Toplevel(self.master)
         self.list.title("Liste aller Stationen")
         
@@ -708,6 +740,8 @@ class Netzplaner:
 
     def restore_all_lines(self):
         self.draw_lines()
+
+    
 
 
 if __name__ == "__main__":

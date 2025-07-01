@@ -36,8 +36,11 @@ class Netzplaner:
         self.station_radius = 10
 
         self.bau = {}
-        
-        self.width = 7
+        try:
+            with open("Linewidth.json", mode="r", encoding="utf-8") as f:
+                self.width = json.load(f)
+        except FileNotFoundError:
+            self.width = 7
         self.search = ""
         self.add_intermediate_stop_button = tk.Button(self.build_line, text="Umsteigemöglichkeit hinzufügen", command=self.add_intermediate_stop_prompt)
         self.add_intermediate_stop_button.pack()
@@ -131,12 +134,15 @@ class Netzplaner:
                         self.left_button.config(bg="black", fg="white")
         elif width == "":
             
-            width = int(simpledialog.askinteger("Breite", "Wie breit sollen deine Linien sein?"))
+            width = int(simpledialog.askinteger("Breite", f"""Wie breit sollen deine Linien sein? 
+            Die Aktuelle Breite beträgt {self.width}."""))
             if width is not None:
             
                 self.width = width
                 self.redraw()
                 self.draw_lines()
+                with open("Linewidth.json", mode="w", encoding="utf-8") as f:
+                    json.dump(self.width, f)
         
         
         self.master.update()
@@ -330,8 +336,7 @@ class Netzplaner:
         if self.x and self.y:
             self.add_station(komplex=True)
     def add_station(self, event=None, komplex=False):
-        if name == "/komplex":
-            self.komplexlinecreation()
+        
         if self.build_mode:
             if komplex == False:
                 x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -341,6 +346,11 @@ class Netzplaner:
                 x = self.x
                 y = self.y
                 name = self.nameE.get()
+            else:
+                return
+            if name == "/komplex":
+                self.komplexlinecreation()
+                return
 
             if name not in self.stations:
                 if name == "":
@@ -749,4 +759,3 @@ if __name__ == "__main__":
     netzplaner = Netzplaner(root)
     netzplaner.run()
 
-        

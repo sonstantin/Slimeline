@@ -432,20 +432,34 @@ class Netzplaner:
 
     
     def create_line(self, event=None):
+        start = self.current_line[0]
+        end = self.current_line[-1]
+        #messagebox.showinfo("Debug", f"{start} und {end}")
         if len(self.current_line) > 1:
             name = simpledialog.askstring("Name", "Wie soll der Name der Linie lauten?")
-            for Line in self.lines:
-                Name = Line[0][0]
-                if name == Name:
-                    Append = messagebox.askyesno("Anhängen", f"Es gibt schon eine Linie namens {name}, willst du die neue anhängen?")
-                    #messagebox.showinfo("Ja", f"{Append}")
-                    if Append == True:
+            if name:
+                count = -1
+                for Line in self.lines:
+                    count += 1
+                    Name = Line[0][0]
+                    line = Line[1]
+                   
+                    if name == Name and start == Line[1][0] or start == Line[1][-1] or end == Line[1][0] or end == Line[1][-1]:
+                        Append = messagebox.askyesno("Anhängen", f"Es gibt schon eine Linie namens {name}, willst du die neue anhängen?")
+                        #messagebox.showinfo("Ja", f"{Append}")
+                        if Append == True:
                         
-                        self.line_color = f"{Line[-1]}"
+                            self.line_color = f"{Line[-1]}"
+                            #messagebox.showinfo("Debug", f"{self.lines}")
+                            del self.lines[count]
+                            LINE = list(Line)
+                            LINE.append(self.current_line)
+                            Line = tuple(LINE)
+                            self.lines.append(Line)
             
-
-            line = (name, self.canvas.create_line([self.stations[point[2]][:2] for point in self.current_line], fill=self.line_color, width=self.width))
-            self.lines.append((line, self.current_line, self.line_color))
+ 
+                line = (name, self.canvas.create_line([self.stations[point[2]][:2] for point in self.current_line], fill=self.line_color, width=self.width))
+                self.lines.append((line, self.current_line, self.line_color))
             self.current_line = []
 
     def choose_color(self, event=None):

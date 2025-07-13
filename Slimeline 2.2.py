@@ -442,7 +442,7 @@ class Netzplaner:
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Verbindungseinträge zur Anzeige vorbereiten
-        for i, (line_data, points, color) in enumerate(self.lines):
+        for i, (line_data, points, time, color) in enumerate(self.lines):
             name = line_data[0]  # Der tatsächliche Linienname
             canvas_id = line_data[1]  # Die Canvas-Zeichen-ID
             

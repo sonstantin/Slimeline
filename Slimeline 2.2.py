@@ -617,7 +617,7 @@ class Netzplaner:
             print(self.lines)
     def draw_lines(self):
         self.canvas.delete("all")
-        for line, points, color in self.lines:
+        for line, points, time, color in self.lines:
             self.canvas.create_line([self.stations[point[2]][:2] for point in points], fill=color, width=self.width)
             for x, y, name in points:
                 self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black",)

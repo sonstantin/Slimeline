@@ -888,7 +888,7 @@ class Netzplaner:
         self.master.mainloop()
     def highlight_single_line(self, selected_line):
         self.canvas.delete("all")
-        for line, points, color in self.lines:
+        for line, points, time, color in self.lines:
             if line == selected_line[0]:
                 draw_color = color
             else:

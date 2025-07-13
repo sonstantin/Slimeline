@@ -350,7 +350,7 @@ class Netzplaner:
 
     def remove_unused_points(self):
         used_points = set()
-        for _, points, _ in self.lines:
+        for _, points, _, _ in self.lines:
             for _, _, name in points:
                 used_points.add(name)
         for name in list(self.stations.keys()):

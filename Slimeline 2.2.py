@@ -78,13 +78,13 @@ class Netzplaner:
         self.arrow = tk.Frame(self.master, relief="solid", borderwidth=5)
         self.arrow.pack(side=tk.RIGHT)
         
-        self.up_button = tk.Button(self.arrow, text="↑", command=lambda: self.move_canvas(0, -10))
+        self.up_button = tk.Button(self.arrow, text="↑", command=lambda: self.move_canvas(0, -1))
         self.up_button.pack(side=tk.RIGHT)
-        self.down_button = tk.Button(self.arrow, text="↓", command=lambda: self.move_canvas(0, 10))
+        self.down_button = tk.Button(self.arrow, text="↓", command=lambda: self.move_canvas(0, 1))
         self.down_button.pack(side=tk.RIGHT)
-        self.left_button = tk.Button(self.arrow, text="←", command=lambda: self.move_canvas(-10, 0))
+        self.left_button = tk.Button(self.arrow, text="←", command=lambda: self.move_canvas(-1, 0))
         self.left_button.pack(side=tk.RIGHT)
-        self.right_button = tk.Button(self.arrow, text="→", command=lambda: self.move_canvas(10, 0))
+        self.right_button = tk.Button(self.arrow, text="→", command=lambda: self.move_canvas(1, 0))
         self.right_button.pack(side=tk.RIGHT)
         
         self.WASD = False
@@ -92,16 +92,16 @@ class Netzplaner:
         self.routebutton = tk.Button(self.master, text="Routenplaner öffnen", command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
         self.routebutton.pack(side=tk.LEFT)
 
-        self.master.bind("<Up>", lambda event: self.move_canvas(0, -10))
-        self.master.bind("<Down>", lambda event: self.move_canvas(0, 10))
-        self.master.bind("<Left>", lambda event: self.move_canvas(-10, 0))
-        self.master.bind("<Right>", lambda event: self.move_canvas(10, 0))
+        self.master.bind("<Up>", lambda event: self.move_canvas(0, -1))
+        self.master.bind("<Down>", lambda event: self.move_canvas(0, 1))
+        self.master.bind("<Left>", lambda event: self.move_canvas(-1, 0))
+        self.master.bind("<Right>", lambda event: self.move_canvas(1, 0))
         if self.WASD:
 
-            self.master.bind("<W>", lambda event: self.move_canvas(0, -10))
-            self.master.bind("<A>", lambda event: self.move_canvas(-10, 0))
-            self.master.bind("<S>", lambda event: self.move_canvas(0, 10))
-            self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
+            self.master.bind("<W>", lambda event: self.move_canvas(0, -1))
+            self.master.bind("<A>", lambda event: self.move_canvas(-1, 0))
+            self.master.bind("<S>", lambda event: self.move_canvas(0, 1))
+            self.master.bind("<D>", lambda event: self.move_canvas(1, 0))
         
         print("Das inizialisieren von Slimeline war erfolgreich!")
         self.master.bind("<Escape>", self.exit)
@@ -226,11 +226,13 @@ class Netzplaner:
             messagebox.showerror("Fehler", f"Die Zielstation '{end_station}' existiert nicht.")
             return
 
-        distances, previous_stations, previous_lines = self.dijkstra(start_station)
+        distances, previous_stations, previous_lines, segment_times = self.dijkstra(start_station)
+
         if distances[end_station] == float('inf'):
             messagebox.showinfo("Information", "Es gibt keine Verbindung zwischen den Stationen.")
             return
 
+        # Route rekonstruieren
         path = []
         lines_used = []
         station = end_station
@@ -239,10 +241,30 @@ class Netzplaner:
             lines_used.insert(0, previous_lines.get(station))
             station = previous_stations[station]
 
+        # Abschnittszeiten aufbauen
+        times_used = []
+        for i in range(len(path)):
+            if i == 0:
+                times_used.append(0)
+            else:
+                times_used.append(segment_times.get(path[i], 0))
+
+        # Gesamtzeit berechnen
+        total_seconds = distances[end_station]
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        minuteLabel = "Minute" if minutes == 1 else "Minuten"
+        secondLabel = "Sekunde" if seconds == 1 else "Sekunden"
+
+        # GUI anzeigen
         route_window = tk.Toplevel(self.master)
         route_window.title(f"Route von {start_station} nach {end_station}")
 
-        title = tk.Label(route_window, text=f"Kürzeste Route von {start_station} nach {end_station} ({distances[end_station] + 1} Stationen):", font=("Arial", 12, "bold"))
+        title = tk.Label(
+            route_window,
+            text=f"Kürzeste Route von {start_station} nach {end_station} ({minutes} {minuteLabel} und {seconds} {secondLabel}):",
+            font=("Arial", 12, "bold")
+        )
         title.pack(pady=10)
 
         container = tk.Frame(route_window)
@@ -257,13 +279,21 @@ class Netzplaner:
             if i > 0 and lines_used[i]:
                 line_name, color = lines_used[i]
                 text_parts.append(("→", "black"))
-                text_parts.append((f"[{line_name[0]}]", color))
+                text_parts.append((f"[{line_name[0]}", color))
+
+                # Abschnittsdauer
+                duration = times_used[i]
+                minutes = duration // 60
+                seconds = duration % 60
+                time_str = f" ({minutes} min {seconds} s)" if minutes else f" ({seconds} s)"
+                text_parts[-1] = (text_parts[-1][0] + time_str + "]", color)
 
             text_parts.append((path[i], "black"))
 
             for text, color in text_parts:
                 label = tk.Label(segment_frame, text=text, font=("Arial", 12), fg=color, bg=segment_frame["bg"])
                 label.pack(side="left", padx=5)
+
 
 
             
@@ -273,34 +303,49 @@ class Netzplaner:
         distances[start_station] = 0
         previous_stations = {station: None for station in self.stations}
         previous_lines = {station: None for station in self.stations}
+        segment_times = {station: 0 for station in self.stations}
         visited = set()
 
         while len(visited) < len(self.stations):
+            # Nächste unbesuchte Station mit geringster Entfernung finden
             min_distance = float('inf')
             min_station = None
             for station in self.stations:
                 if station not in visited and distances[station] < min_distance:
                     min_distance = distances[station]
                     min_station = station
+
             if min_station is None:
                 break
+
             visited.add(min_station)
-            for line_name, points, color in self.lines:
+
+            for line_data in self.lines:
+                if len(line_data) == 4:
+                    (line_name, canvas_id), points, times, color = line_data
+                else:
+                    continue  # alte Struktur überspringen
+
                 for i, (x, y, name) in enumerate(points):
                     if name == min_station:
                         neighbors = []
                         if i > 0:
-                            neighbors.append(points[i-1][2])
+                            neighbors.append((points[i - 1][2], times[i - 1]))
                         if i < len(points) - 1:
-                            neighbors.append(points[i+1][2])
-                        for neighbor in neighbors:
+                            neighbors.append((points[i + 1][2], times[i]))
+
+                        for neighbor, travel_time in neighbors:
                             if neighbor not in visited:
-                                new_distance = distances[min_station] + 1
+                                new_distance = distances[min_station] + travel_time
                                 if new_distance < distances[neighbor]:
                                     distances[neighbor] = new_distance
                                     previous_stations[neighbor] = min_station
                                     previous_lines[neighbor] = (line_name, color)
-        return distances, previous_stations, previous_lines
+                                    segment_times[neighbor] = travel_time
+
+        return distances, previous_stations, previous_lines, segment_times
+
+
 
 
     def remove_unused_points(self):
@@ -397,9 +442,13 @@ class Netzplaner:
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Verbindungseinträge zur Anzeige vorbereiten
-        for idx, (_, points, color) in enumerate(self.lines):
+        for i, (line_data, points, color) in enumerate(self.lines):
+            name = line_data[0]  # Der tatsächliche Linienname
+            canvas_id = line_data[1]  # Die Canvas-Zeichen-ID
+            
+
             stations = " → ".join(point[2] for point in points)
-            self.listbox.insert(tk.END, f"Linie {idx + 1}: {stations} (Farbe: {color})")
+            self.listbox.insert(tk.END, f"Linie {name}: {stations} (Farbe: {color})")
 
         scrollbar.config(command=self.listbox.yview)
         delete_button = tk.Button(self.connection_window, text="Ausgewählte Linie löschen", command=self.delete_selected_connection)
@@ -432,35 +481,90 @@ class Netzplaner:
 
     
     def create_line(self, event=None):
+        if len(self.current_line) == 0:
+            return
+
         start = self.current_line[0]
         end = self.current_line[-1]
-        #messagebox.showinfo("Debug", f"{start} und {end}")
+
         if len(self.current_line) > 1:
             name = simpledialog.askstring("Name", "Wie soll der Name der Linie lauten?")
-            if name:
-                count = -1
-                for Line in self.lines:
-                    count += 1
-                    Name = Line[0][0]
-                    line = Line[1]
-                   
-                    if name == Name and start == Line[1][0] or start == Line[1][-1] or end == Line[1][0] or end == Line[1][-1]:
-                        Append = messagebox.askyesno("Anhängen", f"Es gibt schon eine Linie namens {name}, willst du die neue anhängen?")
-                        #messagebox.showinfo("Ja", f"{Append}")
-                        if Append == True:
-                        
-                            self.line_color = f"{Line[-1]}"
-                            #messagebox.showinfo("Debug", f"{self.lines}")
-                            del self.lines[count]
-                            LINE = list(Line)
-                            LINE.append(self.current_line)
-                            Line = tuple(LINE)
-                            self.lines.append(Line)
-            
- 
-                line = (name, self.canvas.create_line([self.stations[point[2]][:2] for point in self.current_line], fill=self.line_color, width=self.width))
-                self.lines.append((line, self.current_line, self.line_color))
+            if not name:
+                return
+
+            for i, Line in enumerate(self.lines):
+                Name = Line[0][0]
+                existing_points = Line[1]
+                old_times = Line[2]
+                color = Line[3]
+
+                # Prüfen, ob Name gleich ist und Start/End anschließt
+                if name == Name and (
+                    start == existing_points[0] or
+                    start == existing_points[-1] or
+                    end == existing_points[0] or
+                    end == existing_points[-1]
+                ):
+                    Append = messagebox.askyesno("Anhängen", f"Es gibt schon eine Linie namens {name}, willst du die neue anhängen?")
+                    if Append:
+                        # Richtige Richtung ermitteln
+                        if start == existing_points[-1]:
+                            new_points = self.current_line
+                        elif end == existing_points[-1]:
+                            new_points = self.current_line[::-1]
+                        elif start == existing_points[0]:
+                            new_points = self.current_line[::-1]
+                            existing_points = existing_points[::-1]
+                            old_times = old_times[::-1]
+                        elif end == existing_points[0]:
+                            new_points = self.current_line
+                            existing_points = existing_points[::-1]
+                            old_times = old_times[::-1]
+                        else:
+                            continue
+
+                        # Zeiten abfragen
+                        times = []
+                        for j in range(len(new_points) - 1):
+                            t = simpledialog.askinteger("Zeit", f"Zeit zwischen {new_points[j][2]} und {new_points[j+1][2]} (in Sekunden):")
+                            if t is None:
+                                return
+                            times.append(t)
+
+                        # Neue Punktliste und Zeitliste zusammenfügen
+                        full_points = existing_points + new_points[1:]
+                        full_times = old_times + times
+
+                        # Alte Linie löschen und neue zeichnen
+                        self.canvas.delete(Line[0][1])
+                        canvas_line = self.canvas.create_line(
+                            [self.stations[pt[2]][:2] for pt in full_points],
+                            fill=color,
+                            width=self.width
+                        )
+
+                        self.lines[i] = [[name, canvas_line], full_points, full_times, color]
+                        self.current_line = []
+                        return
+
+            # Wenn keine passende Linie gefunden oder Anfügen abgelehnt wurde
+            times = []
+            for i in range(len(self.current_line) - 1):
+                t = simpledialog.askinteger("Zeit", f"Zeit zwischen {self.current_line[i][2]} und {self.current_line[i+1][2]} (in Sekunden):")
+                if t is None:
+                    return
+                times.append(t)
+
+            self.line_color = self.line_color or "black"
+            canvas_line = self.canvas.create_line(
+                [self.stations[pt[2]][:2] for pt in self.current_line],
+                fill=self.line_color,
+                width=self.width
+            )
+            self.lines.append([[name, canvas_line], self.current_line.copy(), times, self.line_color])
             self.current_line = []
+ 
+
 
     def choose_color(self, event=None):
         color = colorchooser.askcolor(title="Linienfarbe wählen")
@@ -477,8 +581,8 @@ class Netzplaner:
                 filename += ".json"
             with open(filename, mode="w", encoding="utf-8") as f:
                 json.dump([self.lines, self.stations], f)
-            with open("Bau " + filename, "wb") as build:
-                pickle.dump(self.bau, build)
+            with open("Bau " + filename, mode="w", encoding="utf-8") as build:
+                json.dump(self.bau, build)
             messagebox.showinfo("Gespeichert", f"Netzplan wurde als '{filename}' gespeichert.")
             
     def load_plan(self, event=None):
@@ -498,8 +602,8 @@ class Netzplaner:
                 return
 
             try:
-                with open("Bau " + filename, "rb") as build:
-                    self.bau = pickle.load(build)
+                with open("Bau " + filename, mode="r", encoding="utf-8") as build:
+                    self.bau = json.load(build)
             except FileNotFoundError:
                 messagebox.showerror("Fehler", f"Datei 'Bau {filename}' wurde nicht gefunden.")
                 self.bau = {}  # Notfalls leeren, aber weitermachen
@@ -625,7 +729,7 @@ class Netzplaner:
                 window.destroy()
                 messagebox.showinfo("Gelöscht", f"Die Linie '{line[0][0]}' wurde gelöscht.")
 
-
+    
     def delete_station(self, station):
         # 1. Aus stations-Dict entfernen
         if station in self.stations:
@@ -648,11 +752,13 @@ class Netzplaner:
         self.RouteFinder = True
         self.start_station = start_station 
         
-    def lineinfo(self, line):
+    def lineinfo(self, line, station):
+        
         self.highlight_single_line(line)
 
         self.info = tk.Toplevel(self.master)
-        self.info.title(f"Information zur {line[0][0]}")
+        count = 0
+        
 
         name = tk.Label(self.info, text=f"Name: {line[0][0]}")
         color = tk.Label(self.info, text=f"Farbe: {line[-1]}", bg=f"{line[-1]}")
@@ -662,18 +768,48 @@ class Netzplaner:
         delete_button = tk.Button(
             self.info,
             text="Diese Linie löschen",
-            fg="white",
+            fg="black",
             command=lambda: self.confirmDeletion(line, self.info)
         )
         delete_button.pack(pady=10)
+
+        overStations = tk.LabelFrame(self.info, text="Stationen:", relief="solid")
+        overStations.pack()
         
 
+        for Astation in line[1]:
+            stop = Astation[2]
+            interchanges = []  
+
+            for Aline in self.lines:
+                if Astation in Aline[1]:
+                    if Aline[0][0] == line[0][0]:
+                        continue
+                    else:
+                        interchanges.append(Aline[0][0])  # oder nur Aline[0], je nach Datenstruktur
+
+            thing = f"{stop}"
+            for part in interchanges:
+                thing += f", {part}"
+                print(thing)
+
+            if str(stop).strip() == str(station).strip():
+                show = tk.Label(overStations, text=f"{thing}", bg="red")
+            else:
+                show = tk.Label(overStations, text=f"{thing}")
+
+            show.pack()
+            count += 1
+
+
+        self.info.title(f"Information zur {line[0][0]} ({count} Station(en))")
+        self.info.protocol("WM_DELETE_WINDOW", self.on_close)
         # Rückkehr zur normalen Darstellung, wenn Fenster geschlossen wird
     def on_close(self):
         self.restore_all_lines()
         self.info.destroy()
 
-        self.info.protocol("WM_DELETE_WINDOW", self.on_close)
+        
 
 
     def stationWindow(self, station):
@@ -693,13 +829,14 @@ class Netzplaner:
                     for linestation in stations:
                         name = linestation[2]
                         color = line[-1]
+                        print(color)
                         if name == station:
-                            inter = tk.Button(stationW, text=linename, bg=f"{color}", command=lambda line=line: self.lineinfo(line=line))
+                            inter = tk.Button(stationW, text=linename, bg=f"{color}", command=lambda line=line, station=station: self.lineinfo(line=line, station=station))
                             inter.pack()
                         
                 renameButton = tk.Button(stationW, text=f"{station} umbenennen", command=lambda station=station: self.rename(station=station))
                 renameButton.pack()
-                deleteButton = tk.Button(stationW, text=f"{station} löschen", command=lambda station=station: self.confirmDeletion(station=station))
+                deleteButton = tk.Button(stationW, text=f"{station} löschen", command=lambda station=station: self.delete_station(station=station))
                 deleteButton.pack()
                 stationW.title(f"{station} - Menü")
                 if self.RouteFinder == False:
@@ -755,9 +892,9 @@ class Netzplaner:
             if line == selected_line[0]:
                 draw_color = color
             else:
-                draw_color = "gray"
+                draw_color = "#ededed"
             coords = [(x, y) for x, y, _ in points]
-            self.canvas.create_line(coords, fill=draw_color)
+            self.canvas.create_line(coords, fill=draw_color, width=self.width)
             for x, y, name in points:
                 self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="black")
                 self.canvas.create_text(x - 15, y, text=name, anchor=tk.E, tags=name)
@@ -772,4 +909,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     netzplaner = Netzplaner(root)
     netzplaner.run()
-

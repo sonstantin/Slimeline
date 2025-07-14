@@ -752,6 +752,21 @@ class Netzplaner:
         self.RouteFinder = True
         self.start_station = start_station 
         
+
+
+    def changeTime(self, Line, number):
+        self.lines.remove(Line)
+        new = simpledialog.askinteger("Zeit", f"Was soll die neue Reisezeit sein? (Die alte war {Line[-2][number]})")
+        if new:
+            newList = Line[-2]
+            newList[number] = new
+            stations =Line[1]
+            other_stuff = Line[0]
+            color = Line[-1]
+
+            newline = [other_stuff, stations, newList, color]
+            
+            self.lines.append(newline)
     def lineinfo(self, line, station):
         
         self.highlight_single_line(line)
@@ -775,6 +790,8 @@ class Netzplaner:
 
         overStations = tk.LabelFrame(self.info, text="Stationen:", relief="solid")
         overStations.pack()
+
+
         
 
         for Astation in line[1]:
@@ -787,16 +804,18 @@ class Netzplaner:
                         continue
                     else:
                         interchanges.append(Aline[0][0])  # oder nur Aline[0], je nach Datenstruktur
-
-            thing = f"{stop}"
+            if count > 0:
+                thing = f"{line[-2][count-1]} -> {stop}"
+            else:
+                thing = f"{stop}"
             for part in interchanges:
                 thing += f", {part}"
                 print(thing)
 
             if str(stop).strip() == str(station).strip():
-                show = tk.Label(overStations, text=f"{thing}", bg="red")
+                show = tk.Button(overStations, text=f"{thing}", bg="red", command=lambda Line=line, number=count-1: self.changeTime(Line, number))
             else:
-                show = tk.Label(overStations, text=f"{thing}")
+                show = tk.Button(overStations, text=f"{thing}", command=lambda Line=line, number=count-1: self.changeTime(Line, number))
 
             show.pack()
             count += 1

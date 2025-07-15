@@ -752,6 +752,12 @@ class Netzplaner:
         self.RouteFinder = True
         self.start_station = start_station 
         
+    def changeName(self, line):
+        self.lines.remove(line)
+        new = simpledialog.askstring("Neuer Name", f"Was soll der neue Name der Linie {line[0][0]} sein?")
+        if new:
+            line[0][0] = new
+            self.lines.append(line)
 
     def changeColor(self, line):
         self.lines.remove(line)
@@ -799,6 +805,8 @@ class Netzplaner:
 
         recolor_button = tk.Button(self.info, text="Farbe ändern", command=lambda line=line:self.changeColor(line=line))
         recolor_button.pack()
+        rename_button = tk.Button(self.info, text="Namen ändern", command=lambda line=line: self.changeName(line=line))
+        rename_button.pack()
 
 
         
@@ -858,7 +866,7 @@ class Netzplaner:
                     for linestation in stations:
                         name = linestation[2]
                         color = line[-1]
-                        print(color)
+                        
                         if name == station:
                             inter = tk.Button(stationW, text=linename, bg=f"{color}", command=lambda line=line, station=station: self.lineinfo(line=line, station=station))
                             inter.pack()

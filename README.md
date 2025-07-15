@@ -13,7 +13,7 @@ Stationen umbenennen,
 Stationen löschen,
 Bau Modus Aktivieren oder deaktivieren,
 Bauprojekte starten und beenden, Liste aller Stationen mit Suche, Liste aller Linien, Linien löschen, Die Breite der Linien festlegen, Den Linienverlauf einsehen,
-Linien verlängern
+Linien verlängern, Linien bearbeiten
 
 *Jetzt auch mit Tastenkombinationen*:
 Escape: Beenden,

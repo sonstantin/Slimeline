@@ -753,7 +753,13 @@ class Netzplaner:
         self.start_station = start_station 
         
 
-
+    def changeColor(self, line):
+        self.lines.remove(line)
+        new = colorchooser.askcolor(line[-1])[1]
+        if new:
+            line[-1] = new
+            self.lines.append(line)
+            self.draw_lines()
     def changeTime(self, Line, number):
         self.lines.remove(Line)
         new = simpledialog.askinteger("Zeit", f"Was soll die neue Reisezeit sein? (Die alte war {Line[-2][number]})")
@@ -791,6 +797,9 @@ class Netzplaner:
         overStations = tk.LabelFrame(self.info, text="Stationen:", relief="solid")
         overStations.pack()
 
+        recolor_button = tk.Button(self.info, text="Farbe ändern", command=lambda line=line:self.changeColor(line=line))
+        recolor_button.pack()
+
 
         
 
@@ -823,6 +832,7 @@ class Netzplaner:
 
         self.info.title(f"Information zur {line[0][0]} ({count} Station(en))")
         self.info.protocol("WM_DELETE_WINDOW", self.on_close)
+
         # Rückkehr zur normalen Darstellung, wenn Fenster geschlossen wird
     def on_close(self):
         self.restore_all_lines()

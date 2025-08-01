@@ -115,6 +115,15 @@ class Netzplaner:
         self.master.bind("<Control-b>", self.toggle_build_mode)
         self.master.bind("<Control-r>", lambda start="", stop="":self.open_route_planner_window(start="", stop=""))
         self.master.bind("<Control-k>", self.komplexlinecreation)
+        self.master.bind("<Shift-Escape>", self.close_all_except_root)
+
+
+    def close_all_except_root(self, event=None):
+        # Alle Kinder von root durchgehen
+        for widget in root.winfo_children():
+            # Nur Toplevel-Fenster schließen (nicht das root selbst)
+            if isinstance(widget, tk.Toplevel):
+                widget.destroy()
     def setOptions(self, canvasBG, uiBG, width):
         if canvasBG == "":
         
@@ -156,7 +165,7 @@ class Netzplaner:
         
     def options(self):
         settings = tk.Toplevel(self.master)
-        
+        settings.bind("<Shift-Escape>", self.close_all_except_root)
         
         settings.title("Einstellungen")
         graphical = tk.LabelFrame(settings, text="Graphische Einstellungen", relief="solid", borderwidth=5)
@@ -188,11 +197,12 @@ class Netzplaner:
         SaveButton.pack()
         LoadButton = tk.Button(Auswahl, text="Laden", command=self.load_plan)
         LoadButton.pack()
+        Auswahl.bind("<Shift-Escape>", self.close_all_except_root)
         
     def open_route_planner_window(self, start, stop, event=None):
         window = tk.Toplevel(self.master)
         window.title("Routenplaner")
-
+        window.bind("<Shift-Escape>", self.close_all_except_root)
         start_label = tk.Label(window, text="Startstation:")
         start_label.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
         self.start_entry = tk.Entry(window)
@@ -211,6 +221,7 @@ class Netzplaner:
     def lists(self):
         ask = tk.Toplevel(self.master)
         ask.title("Listen")
+        ask.bind("<Shift-Escape>", self.close_all_except_root)
         OfStations = tk.Button(ask, text="Liste aller Stationen zeigen", command=self.showListOfAllStations)
         OfStations.pack()
         OfLines = tk.Button(ask, text="Liste aller Verbindungen zeigen", command=self.showListOfConnectionsToDelete)
@@ -266,7 +277,7 @@ class Netzplaner:
             font=("Arial", 12, "bold")
         )
         title.pack(pady=10)
-
+        route_window.bind("<Shift-Escape>", self.close_all_except_root)
         container = tk.Frame(route_window)
         container.pack(padx=10, pady=5)
 
@@ -365,7 +376,7 @@ class Netzplaner:
 
         komplex = tk.Toplevel(self.master)
         komplex.title("Komplexe Stationserstellung")
-        
+        komplex.bind("<Shift-Escape>", self.close_all_except_root)
         nameL = tk.Label(komplex, text="Hier soll der Name der Station eingegeben werden:")
         nameL.pack()
 
@@ -434,7 +445,7 @@ class Netzplaner:
 
         self.connection_window = tk.Toplevel(self.master)
         self.connection_window.title("Linien")
-    
+        self.connection_window.bind("<Shift-Escape>", self.close_all_except_root)
         scrollbar = tk.Scrollbar(self.connection_window)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -627,6 +638,7 @@ class Netzplaner:
     def open_line_creation_window(self, name):
         if not self.build_mode:
             window = tk.Toplevel(self.master)
+            window.bind("<Shift-Escape>", self.close_all_except_root)
             window.title("Linie erstellen")
             button = tk.Button(window, text=f"Linie von {name} erstellen", command=lambda: self.start_line_creation(name))
             button.pack()
@@ -644,7 +656,7 @@ class Netzplaner:
     def showListOfAllStations(self, event=None):
         self.list = tk.Toplevel(self.master)
         self.list.title("Liste aller Stationen")
-        
+        self.list.bind("<Shift-Escape>", self.close_all_except_root)
         self.searchEntry = tk.Entry(self.list, width=20)
         self.searchEntry.grid(row=0, column=0)
         searchButton = tk.Button(self.list, text="Suchen", command=self.searchF)
@@ -674,7 +686,7 @@ class Netzplaner:
     def rename(self,station):
         renameW = tk.Toplevel(self.master)
         renameW.title(f"{station} umbenennen")
-        
+        renameW.bind("<Shift-Escape>", self.close_all_except_root)
         ueberschrift = tk.Label(renameW, text=f"Wie soll {station} in Zukunft heissen")
         ueberschrift.pack()
         
@@ -802,7 +814,7 @@ class Netzplaner:
 
         overStations = tk.LabelFrame(self.info, text="Stationen:", relief="solid")
         overStations.pack()
-
+        self.info.bind("<Shift-Escape>", self.close_all_except_root)
         recolor_button = tk.Button(self.info, text="Farbe ändern", command=lambda line=line:self.changeColor(line=line))
         recolor_button.pack()
         rename_button = tk.Button(self.info, text="Namen ändern", command=lambda line=line: self.changeName(line=line))
@@ -852,6 +864,7 @@ class Netzplaner:
     def stationWindow(self, station):
                 #self.bau ist ein dictionary welches die Bauprojekte zeigt
                 stationW = tk.Toplevel(self.master)
+                stationW.bind("<Shift-Escape>", self.close_all_except_root)
                 # self.lines: [(Name, identification_number[(koor, dina, ten, "name1"), (koor, dina, ten, "name2")], "color")]
                 name = tk.Label(stationW, text=f"Name: {station}")
                 name.pack()

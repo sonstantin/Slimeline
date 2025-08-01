@@ -25,4 +25,5 @@ Strg+U: Umsteigestation hinzufügen,
 Alt+C: Farbe auswählen,
 Strg+B: Baumodus aktivieren und deaktivieren,
 Strg+R: Route finden,
-Strg+K: Komplexe Stationärstellung (auch durch Stationsname "/komplex")
+Strg+K: Komplexe Stationärstellung (auch durch Stationsname "/komplex"),
+Shift+Escape: Alle Nebenfenster schließen

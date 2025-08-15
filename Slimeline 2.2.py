@@ -5,19 +5,20 @@ from tkinter import colorchooser, simpledialog, messagebox
 import pickle, json
 from PIL import Image, ImageTk
 import requests
+import sys, os
 
 
 
 
 class Netzplaner:
     def __init__(self, master):
-        
+        print("============Slimeline============")
         image_url = "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/c/cc/Schleim.png/revision/latest/scale-to-width-down/150?cb=20200403150614.png"
         response = requests.get(image_url)
         with open("schleim.png", "wb") as f:
             f.write(response.content)
         from PIL import Image
-        print("Slimeline wird geladen")
+        
         self.master = master
         self.master.title("Slimeline 2.2")
         self.image = Image.open("schleim.png")
@@ -39,10 +40,16 @@ class Netzplaner:
         try:
             with open("Linewidth.json", mode="r", encoding="utf-8") as f:
                 self.width = json.load(f)
+                language = self.width[1]
+                self.width = self.width[0]
         except FileNotFoundError:
             self.width = 7
+            language = "Englisch"
+        with open(f"slimeline_text_{language}.json", mode="r", encoding="utf-8") as f:
+            self.strings = json.load(f)
+        print(self.strings["Slimeline wird geladen"])
         self.search = ""
-        self.add_intermediate_stop_button = tk.Button(self.build_line, text="Umsteigemöglichkeit hinzufügen", command=self.add_intermediate_stop_prompt)
+        self.add_intermediate_stop_button = tk.Button(self.build_line, text=self.strings["Umsteigemöglichkeit hinzufügen"], command=self.add_intermediate_stop_prompt)
         self.add_intermediate_stop_button.pack()
         self.stations = {}
         self.lines = []
@@ -55,22 +62,22 @@ class Netzplaner:
         self.canvas.bind("<Button-1>", lambda event: self.add_station(event, komplex=False))
 
 
-        self.create_line_button = tk.Button(self.build_line, text="Linie erstellen", command=self.create_line)
+        self.create_line_button = tk.Button(self.build_line, text=self.strings["Linie erstellen"], command=self.create_line)
         self.create_line_button.pack()
-        self.listbutton = tk.Button(self.master, text="Liste der Stationen und Verbindungen", command=self.lists)
+        self.listbutton = tk.Button(self.master, text=self.strings["Liste der Stationen und Verbindungen"], command=self.lists)
         self.listbutton.pack()
-        self.choose_color_button = tk.Button(self.master, text="Linienfarbe wählen", command=self.choose_color)
+        self.choose_color_button = tk.Button(self.master, text=self.strings["Linienfarbe wählen"], command=self.choose_color)
         self.choose_color_button.pack()
 
         # NEU: Separate Buttons für Speichern und Laden
-        self.save_button = tk.Button(self.master, text="Speichern/Laden", command=self.saveOrLoad)
+        self.save_button = tk.Button(self.master, text=self.strings["Speichern/Laden"], command=self.saveOrLoad)
         self.save_button.pack()
         
         
-        self.build_mode_button = tk.Button(self.master, text="Bau-Modus deaktivieren", command=self.toggle_build_mode)
+        self.build_mode_button = tk.Button(self.master, text=self.strings["Bau-Modus deaktivieren"], command=self.toggle_build_mode)
         self.build_mode_button.pack()
         
-        options = tk.Button(self.master, text="Optionen", command=self.options)
+        options = tk.Button(self.master, text=self.strings["Optionen"], command=self.options)
         options.pack(anchor="w")
 
         self.line_color = "green"
@@ -89,7 +96,7 @@ class Netzplaner:
         
         self.WASD = False
 
-        self.routebutton = tk.Button(self.master, text="Routenplaner öffnen", command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
+        self.routebutton = tk.Button(self.master, text=self.strings["Routenplaner öffnen"], command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
         self.routebutton.pack(side=tk.LEFT)
 
         self.master.bind("<Up>", lambda event: self.move_canvas(0, -1))
@@ -103,7 +110,7 @@ class Netzplaner:
             self.master.bind("<S>", lambda event: self.move_canvas(0, 1))
             self.master.bind("<D>", lambda event: self.move_canvas(1, 0))
         
-        print("Das inizialisieren von Slimeline war erfolgreich!")
+        print(self.strings["Das inizialisieren von Slimeline war erfolgreich!"])
         self.master.bind("<Escape>", self.exit)
         self.master.bind("<Control-s>", self.save_plan)
         self.master.bind("<Control-o>", self.load_plan)
@@ -127,14 +134,14 @@ class Netzplaner:
     def setOptions(self, canvasBG, uiBG, width):
         if canvasBG == "":
         
-            canvasBG = colorchooser.askcolor(title="Hintergrundfarbe wählen")
+            canvasBG = colorchooser.askcolor(title=self.strings["Hintergrundfarbe wählen"])
             if uiBG[1]:
                 
                 self.canvas.configure(bg=f"{canvasBG[1]}")
                 self.canvas.configure(bg=f"{canvasBG[1]}")
             
         elif uiBG == "":
-            uiBG = colorchooser.askcolor(title="Hintergrundfarbe wählen")
+            uiBG = colorchooser.askcolor(title=self.strings["Hintergrundfarbe wählen"])
             if uiBG[1]:
                 self.uiBG = uiBG
                 self.master.configure(bg=f"{self.uiBG[1]}")
@@ -143,8 +150,7 @@ class Netzplaner:
                         self.left_button.config(bg="black", fg="white")
         elif width == "":
             
-            width = int(simpledialog.askinteger("Breite", f"""Wie breit sollen deine Linien sein? 
-            Die Aktuelle Breite beträgt {self.width}."""))
+            width = int(simpledialog.askinteger("Breite", self.strings["Wie breit sollen deine Linien sein? Die Aktuelle Breite beträgt"].replace("self.width", f"{self.width}")))
             if width is not None:
             
                 self.width = width
@@ -162,15 +168,22 @@ class Netzplaner:
     def exit(self, event=None):
         self.master.destroy()
         
-        
+    def set_language(self, language):
+        self.width = [self.width, language]
+        with open("Linewidth.json", mode="w", encoding="utf-8") as f:
+            json.dump(self.width, f)
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
+    
+
     def options(self):
         settings = tk.Toplevel(self.master)
         settings.bind("<Shift-Escape>", self.close_all_except_root)
         
-        settings.title("Einstellungen")
-        graphical = tk.LabelFrame(settings, text="Graphische Einstellungen", relief="solid", borderwidth=5)
+        settings.title(self.strings["Einstellungen"])
+        graphical = tk.LabelFrame(settings, text=self.strings["Graphische Einstellungen"], relief="solid", borderwidth=5)
         graphical.grid(row=0, column=0)
-        canvasbgEntry = tk.Button(graphical, text="Bestimmen", command=lambda uiBG="bla", canvasBG="", width="bla": self.setOptions(uiBG="bla", canvasBG="", width="bla"))
+        canvasbgEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="bla", canvasBG="", width="bla": self.setOptions(uiBG="bla", canvasBG="", width="bla"))
         canvasbgEntry.grid(row=0, column=1)
         canvasbgLabel = tk.Label(graphical, text="Hintergrund des Plans bestimmen:")
         
@@ -179,68 +192,73 @@ class Netzplaner:
         
         uiLabel = tk.Label(graphical, text="Hintergrund der Benutzeroberfläche bestimmen:")
         uiLabel.grid(row=1, column=0)
-        uiEntry = tk.Button(graphical, text="Bestimmen", command=lambda uiBG="", canvasBG="bla", width="bla": self.setOptions(uiBG="", canvasBG="bla", width="bla"))
+        uiEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="", canvasBG="bla", width="bla": self.setOptions(uiBG="", canvasBG="bla", width="bla"))
         uiEntry.grid(row=1, column=1)
         
         widthLabel = tk.Label(graphical, text="Breite der Linien bestimmen:")
         widthLabel.grid(row=2, column=0)
         
-        widthEntry = tk.Button(graphical, text="Bestimmen", command=lambda canvasBG="bla", uiBG="bla", width="": self.setOptions(canvasBG="bla", uiBG="bla", width=""))
+        widthEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda canvasBG="bla", uiBG="bla", width="": self.setOptions(canvasBG="bla", uiBG="bla", width=""))
         widthEntry.grid(row=2, column=1)
-        
-        
+
+        lingual = tk.LabelFrame(settings, relief="solid", text=self.strings["Sprache"])
+        lingual.grid(row=1, column=0)
+
+        tk.Button(lingual, text="Deutsch", command=lambda language="Deutsch": self.set_language(language=language)).pack()
+        tk.Button(lingual, text="English", command=lambda language="Englisch": self.set_language(language=language)).pack()
        
     def saveOrLoad(self):
         Auswahl = tk.Toplevel(self.master)
-        Auswahl.title("Auswahl zum Speichern oder Laden")
-        SaveButton = tk.Button(Auswahl, text="Speichern", command=self.save_plan)
+        Auswahl.title(self.strings["Auswahl zum Speichern oder Laden"])
+        SaveButton = tk.Button(Auswahl, text=self.strings["Speichern"], command=self.save_plan)
         SaveButton.pack()
-        LoadButton = tk.Button(Auswahl, text="Laden", command=self.load_plan)
+        LoadButton = tk.Button(Auswahl, text=self.strings["Laden"], command=self.load_plan)
         LoadButton.pack()
         Auswahl.bind("<Shift-Escape>", self.close_all_except_root)
         
     def open_route_planner_window(self, start, stop, event=None):
         window = tk.Toplevel(self.master)
-        window.title("Routenplaner")
+        window.title(self.strings["Routenplaner"])
         window.bind("<Shift-Escape>", self.close_all_except_root)
-        start_label = tk.Label(window, text="Startstation:")
+        start_label = tk.Label(window, text=self.strings["Startstation:"])
         start_label.grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
         self.start_entry = tk.Entry(window)
         self.start_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        end_label = tk.Label(window, text="Zielstation:")
+        end_label = tk.Label(window, text=self.strings["Zielstation:"])
         end_label.grid(row=1, column=0, padx=10, pady=5, sticky=tk.W)
         self.end_entry = tk.Entry(window)
         self.end_entry.grid(row=1, column=1, padx=10, pady=5)
         self.start_entry.insert(0, start)
         self.end_entry.insert(0, stop)
 
-        calculate_button = tk.Button(window, text="Route berechnen", command=self.calculate_route)
+        calculate_button = tk.Button(window, text=self.strings["Route berechnen"], command=self.calculate_route)
         calculate_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
         
     def lists(self):
         ask = tk.Toplevel(self.master)
-        ask.title("Listen")
+        ask.title(self.strings["Listen"])
         ask.bind("<Shift-Escape>", self.close_all_except_root)
-        OfStations = tk.Button(ask, text="Liste aller Stationen zeigen", command=self.showListOfAllStations)
+        OfStations = tk.Button(ask, text=self.strings["Liste aller Stationen zeigen"], command=self.showListOfAllStations)
         OfStations.pack()
-        OfLines = tk.Button(ask, text="Liste aller Verbindungen zeigen", command=self.showListOfConnectionsToDelete)
+        OfLines = tk.Button(ask, text=self.strings["Liste aller Verbindungen zeigen"], command=self.showListOfConnectionsToDelete)
         OfLines.pack()
+
     def calculate_route(self):
         start_station = self.start_entry.get()
         end_station = self.end_entry.get()
 
         if start_station not in self.stations:
-            messagebox.showerror("Fehler", f"Die Startstation '{start_station}' existiert nicht.")
+            messagebox.showerror(self.strings["Fehler"], self.strings["Die Startstation 'start_station' existiert nicht."].replace("start_station", f"{start_station}"))
             return
         if end_station not in self.stations:
-            messagebox.showerror("Fehler", f"Die Zielstation '{end_station}' existiert nicht.")
+            messagebox.showerror(self.strings["Fehler"], self.strings["Die Zielstation 'end_station' existiert nicht."].replace("end_station", f"{end_station}"))
             return
 
         distances, previous_stations, previous_lines, segment_times = self.dijkstra(start_station)
 
         if distances[end_station] == float('inf'):
-            messagebox.showinfo("Information", "Es gibt keine Verbindung zwischen den Stationen.")
+            messagebox.showinfo(self.strings["Fehler"], self.strings["Es gibt keine Verbindung zwischen den Stationen."])
             return
 
         # Route rekonstruieren
@@ -264,16 +282,16 @@ class Netzplaner:
         total_seconds = distances[end_station]
         minutes = total_seconds // 60
         seconds = total_seconds % 60
-        minuteLabel = "Minute" if minutes == 1 else "Minuten"
-        secondLabel = "Sekunde" if seconds == 1 else "Sekunden"
+        minuteLabel = self.strings["Minute"] if minutes == 1 else self.strings["Minuten"]
+        secondLabel = self.strings["Sekunde"] if seconds == 1 else self.strings["Sekunden"]
 
         # GUI anzeigen
         route_window = tk.Toplevel(self.master)
-        route_window.title(f"Route von {start_station} nach {end_station}")
+        route_window.title("Route von start_station nach end_station".replace("/start_station", start_station).replace("/end_station", end_station))
 
         title = tk.Label(
             route_window,
-            text=f"Kürzeste Route von {start_station} nach {end_station} ({minutes} {minuteLabel} und {seconds} {secondLabel}):",
+            text=self.strings["Kürzeste Route von /start_station nach /end_station (/minutes /minuteLabel und /seconds /secondLabel):"].replace("/start_station", start_station).replace("/end_station", end_station).replace("/minutes", minutes).replace("/minuteLabel", minuteLabel).replace("/seconds", seconds).replace("/secondLabel", secondLabel),
             font=("Arial", 12, "bold")
         )
         title.pack(pady=10)
@@ -372,23 +390,23 @@ class Netzplaner:
             if name not in used_points:
                 self.current_line.remove((x, y, name))
     def komplexlinecreation(self, event=None):
-        print("Komplexe Stationserstellung")
+        print(self.strings["Komplexe Stationserstellung"])
 
         komplex = tk.Toplevel(self.master)
-        komplex.title("Komplexe Stationserstellung")
+        komplex.title(self.strings["Komplexe Stationserstellung"])
         komplex.bind("<Shift-Escape>", self.close_all_except_root)
-        nameL = tk.Label(komplex, text="Hier soll der Name der Station eingegeben werden:")
+        nameL = tk.Label(komplex, text=self.strings["Hier soll der Name der Station eingegeben werden:"])
         nameL.pack()
 
         self.nameE = tk.Entry(komplex, width=20)
         self.nameE.pack()
 
-        proceed = tk.Button(komplex, text="Weiter ->", command=self.komplex)
+        proceed = tk.Button(komplex, text=self.strings["Weiter ->"], command=self.komplex)
         proceed.pack()
 
     def komplex(self):
-        self.x = simpledialog.askinteger("X-Koordinate", "Was soll die x Koordinate, also die Koordinate von links nach rechts sein?")
-        self.y = simpledialog.askinteger("Y-Koordinate", "Was soll die y Koordinate, also die Koordinate von oben nach unten sein?")
+        self.x = simpledialog.askinteger(self.strings["X-Koordinate"], self.strings["Was soll die x Koordinate, also die Koordinate von links nach rechts sein?"])
+        self.y = simpledialog.askinteger(self.strings["Y-Koordinate"], self.strings["Was soll die y Koordinate, also die Koordinate von oben nach unten sein?"])
         if self.x and self.y:
             self.add_station(komplex=True)
     def add_station(self, event=None, komplex=False):
@@ -410,14 +428,12 @@ class Netzplaner:
 
             if name not in self.stations:
                 if name == "":
-                    proceed = messagebox.askyesno("Bestätigen", """Willst du wirklich eine
-   Station ohne Namen
-   erstellen?""")
+                    proceed = messagebox.askyesno(self.strings["Bestätigen"], self.strings["Willst du wirklich eine Station ohne Namen erstellen?"])
                     if proceed == False:
                         return
                 self.stations[name] = (x, y)
                 self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black")
-                print(f"Station wird erstellt: {name!r}")
+                print("Station wird erstellt: /name".replace("/name", name))
                 
                 self.canvas.create_text(x-15, y, text=name, anchor=tk.E, tags=name)
             self.current_line.append((x, y, name))
@@ -428,7 +444,7 @@ class Netzplaner:
                 x, y = self.stations[station]
                 self.current_line.append((x, y, station))
             else:
-                messagebox.showerror("Fehler", f"Die Station '{station}' existiert nicht.")
+                messagebox.showerror(self.strings["Fehler"], self.strings["Die Startstation 'start_station' existiert nicht.".replace("start_station", station)])
     def redraw(self):
         self.canvas.delete("all")
         for name, (x, y) in self.stations.items():
@@ -444,7 +460,7 @@ class Netzplaner:
             return
 
         self.connection_window = tk.Toplevel(self.master)
-        self.connection_window.title("Linien")
+        self.connection_window.title(self.strings["Linien"])
         self.connection_window.bind("<Shift-Escape>", self.close_all_except_root)
         scrollbar = tk.Scrollbar(self.connection_window)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -459,15 +475,15 @@ class Netzplaner:
             
 
             stations = " → ".join(point[2] for point in points)
-            self.listbox.insert(tk.END, f"Linie {name}: {stations} (Farbe: {color})")
+            self.listbox.insert(tk.END, "Linie /name: /stations (Farbe: /color)".replace("/name", name).replace("/stations", stations).replace("/color", color))
 
         scrollbar.config(command=self.listbox.yview)
-        delete_button = tk.Button(self.connection_window, text="Ausgewählte Linie löschen", command=self.delete_selected_connection)
+        delete_button = tk.Button(self.connection_window, text=self.strings["Ausgewählte Linie löschen"], command=self.delete_selected_connection)
         delete_button.pack(pady=5)
     def delete_selected_connection(self):
         selected = self.listbox.curselection()
         if not selected:
-            messagebox.showwarning("Keine Auswahl", "Bitte eine Verbindung auswählen.")
+            messagebox.showwarning(self.strings["Keine Auswahl"], self.strings["Bitte eine Verbindung auswählen."])
             return
         index = selected[0]
 
@@ -485,7 +501,7 @@ class Netzplaner:
 
     def add_intermediate_stop_prompt(self, event=None):
         if self.build_mode:
-            station = simpledialog.askstring("Umsteigemöglichkeit hinzufügen", "Bitte geben Sie den Namen der Station ein:")
+            station = simpledialog.askstring(self.strings["Umsteigemöglichkeit hinzufügen"], self.strings["Bitte geben Sie den Namen der Station ein:"])
             if station:
                 self.add_intermediate_stop(station)
 
@@ -499,7 +515,7 @@ class Netzplaner:
         end = self.current_line[-1]
 
         if len(self.current_line) > 1:
-            name = simpledialog.askstring("Name", "Wie soll der Name der Linie lauten?")
+            name = simpledialog.askstring(self.strings["Name"], self.strings["Wie soll der Name der Linie lauten?"])
             if not name:
                 return
 
@@ -516,7 +532,7 @@ class Netzplaner:
                     end == existing_points[0] or
                     end == existing_points[-1]
                 ):
-                    Append = messagebox.askyesno("Anhängen", f"Es gibt schon eine Linie namens {name}, willst du die neue anhängen?")
+                    Append = messagebox.askyesno(self.strings["Anhängen"], "Es gibt schon eine Linie namens /name, willst du die neue anhängen?".replace("/name", name))
                     if Append:
                         # Richtige Richtung ermitteln
                         if start == existing_points[-1]:
@@ -537,7 +553,17 @@ class Netzplaner:
                         # Zeiten abfragen
                         times = []
                         for j in range(len(new_points) - 1):
-                            t = simpledialog.askinteger("Zeit", f"Zeit zwischen {new_points[j][2]} und {new_points[j+1][2]} (in Sekunden):")
+                            text = self.strings[
+                            "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):"
+                            ]
+
+                            # Platzhalter ersetzen (beide müssen Strings sein)
+                            text = text.replace("/new_points[j][2]", str(new_points[j][2]))
+                            text = text.replace("/new_points[j+1][2]", str(new_points[j+1][2]))
+
+                            # Dialog anzeigen
+                            t = simpledialog.askinteger(self.strings["Zeit"], text)
+
                             if t is None:
                                 return
                             times.append(t)
@@ -561,10 +587,19 @@ class Netzplaner:
             # Wenn keine passende Linie gefunden oder Anfügen abgelehnt wurde
             times = []
             for i in range(len(self.current_line) - 1):
-                t = simpledialog.askinteger("Zeit", f"Zeit zwischen {self.current_line[i][2]} und {self.current_line[i+1][2]} (in Sekunden):")
+                text = self.strings[
+                    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):"
+                ]
+
+                # Hier i statt j verwenden
+                text = text.replace("/new_points[j][2]", str(self.current_line[i][2]))
+                text = text.replace("/new_points[j+1][2]", str(self.current_line[i + 1][2]))
+
+                t = simpledialog.askinteger(self.strings["Zeit"], text)
                 if t is None:
                     return
                 times.append(t)
+
 
             self.line_color = self.line_color or "black"
             canvas_line = self.canvas.create_line(
@@ -578,15 +613,13 @@ class Netzplaner:
 
 
     def choose_color(self, event=None):
-        color = colorchooser.askcolor(title="Linienfarbe wählen")
+        color = colorchooser.askcolor(title=self.strings["Linienfarbe wählen"])
         if color[1]:
             self.line_color = color[1]
 
     def save_plan(self, event=None):
         self.remove_unused_points()
-        filename = simpledialog.askstring("Speichern unter", """Dateiname für den Netzplan eingeben: 
-        (Merken Sie
-        sich den Namen der Datei!)""")
+        filename = simpledialog.askstring(self.strings["Speichern unter"], self.strings["Dateiname für den Netzplan eingeben: (Merken Sie sich den Namen der Datei!)"])
         if filename:
             if not filename.endswith(".json"):
                 filename += ".json"
@@ -594,11 +627,10 @@ class Netzplaner:
                 json.dump([self.lines, self.stations], f)
             with open("Bau " + filename, mode="w", encoding="utf-8") as build:
                 json.dump(self.bau, build)
-            messagebox.showinfo("Gespeichert", f"Netzplan wurde als '{filename}' gespeichert.")
+            messagebox.showinfo(self.strings["Gespeichert"], self.strings["Netzplan wurde als '/filename' gespeichert."].replace("/filename", filename))
             
     def load_plan(self, event=None):
-        filename = simpledialog.askstring("Laden", """Name der Datei, die geladen werden soll:
-            """)
+        filename = simpledialog.askstring(self.strings["Laden"], self.strings["Name der Datei, die geladen werden soll:"])
             
         if filename:
             if not filename.endswith(".json"):
@@ -609,19 +641,19 @@ class Netzplaner:
                     self.lines = liste[0]
                     self.stations = liste[1]
             except FileNotFoundError:
-                messagebox.showerror("Fehler", f"Datei '{filename}' wurde nicht gefunden.")
+                messagebox.showerror(self.strings["Fehler"], self.strings["Datei '/filename' wurde nicht gefunden."].replace("/filename", filename))
                 return
 
             try:
                 with open("Bau " + filename, mode="r", encoding="utf-8") as build:
                     self.bau = json.load(build)
             except FileNotFoundError:
-                messagebox.showerror("Fehler", f"Datei 'Bau {filename}' wurde nicht gefunden.")
+                messagebox.showerror(self.strings["Fehler"], self.strings["Datei 'Bau /filename' wurde nicht gefunden."].replace("/filename", filename))
                 self.bau = {}  # Notfalls leeren, aber weitermachen
             
 
             self.draw_lines()  # Jetzt korrekt nach dem Laden
-            messagebox.showinfo("Geladen", f"Netzplan '{filename}' wurde geladen.\n\nStationen:\n{self.stations}")
+            messagebox.showinfo(self.strings["Geladen"], self.strings["Netzplan '/filename' wurde geladen. Stationen: /self.stations"].replace("/filename", filename))
 
                 
             print(self.stations)
@@ -639,8 +671,8 @@ class Netzplaner:
         if not self.build_mode:
             window = tk.Toplevel(self.master)
             window.bind("<Shift-Escape>", self.close_all_except_root)
-            window.title("Linie erstellen")
-            button = tk.Button(window, text=f"Linie von {name} erstellen", command=lambda: self.start_line_creation(name))
+            window.title(self.strings["Linie erstellen"])
+            button = tk.Button(window, text=self.strings["Linie von /name erstellen"].replace("/name", name), command=lambda: self.start_line_creation(name))
             button.pack()
 
     def start_line_creation(self, name):
@@ -648,18 +680,18 @@ class Netzplaner:
 
     def toggle_build_mode(self, event=None):
         self.build_mode = not self.build_mode
-        self.build_mode_button.config(text="Bau-Modus deaktivieren" if self.build_mode else "Bau-Modus aktivieren")
+        self.build_mode_button.config(text=self.strings["Bau-Modus deaktivieren"] if self.build_mode else self.strings["Bau-Modus aktivieren"])
 
     def move_canvas(self, dx, dy):
         self.canvas.xview_scroll(dx, "units")
         self.canvas.yview_scroll(dy, "units")
     def showListOfAllStations(self, event=None):
         self.list = tk.Toplevel(self.master)
-        self.list.title("Liste aller Stationen")
+        self.list.title(self.strings["Liste aller Stationen"])
         self.list.bind("<Shift-Escape>", self.close_all_except_root)
         self.searchEntry = tk.Entry(self.list, width=20)
         self.searchEntry.grid(row=0, column=0)
-        searchButton = tk.Button(self.list, text="Suchen", command=self.searchF)
+        searchButton = tk.Button(self.list, text=self.strings["Suchen"], command=self.searchF)
         searchButton.grid(row=0, column=1)
         varRow = 1
         varColumn = 0
@@ -680,28 +712,28 @@ class Netzplaner:
                     varColumn += 1
                     varRow = 1
                 count += 1
-        self.list.title(f"Liste aller Stationen (insgesamt {count})")
+        self.list.title(self.strings["Liste aller Stationen (insgesamt /count)"].replace("/count", str(count)))
         
          #34 
     def rename(self,station):
         renameW = tk.Toplevel(self.master)
-        renameW.title(f"{station} umbenennen")
+        renameW.title(self.strings["/station umbenennen"].replace("/station", station))
         renameW.bind("<Shift-Escape>", self.close_all_except_root)
-        ueberschrift = tk.Label(renameW, text=f"Wie soll {station} in Zukunft heissen")
+        ueberschrift = tk.Label(renameW, text=self.strings["Wie soll /station in Zukunft heissen"].replace("/station", station))
         ueberschrift.pack()
         
         newNameEntry = tk.Entry(renameW, width=50)
         newNameEntry.pack()
         newNameEntry.insert(0, f"{station}")
         
-        confirm = tk.Button(renameW, text="Bestätigen", command=lambda: self.Dorename(station=station, new=newNameEntry.get()))
+        confirm = tk.Button(renameW, text=self.strings["Bestätigen"], command=lambda: self.Dorename(station=station, new=newNameEntry.get()))
 
 
         confirm.pack()
     def Dorename(self, station, new):
     # 1. Prüfen, ob der neue Name schon existiert
         if new in self.stations:
-            messagebox.showerror("Fehler", f"Name '{new}' existiert bereits!")
+            messagebox.showerror(self.strings["Fehler"], self.strings["Name '/new' existiert bereits!"].replace("/new", new))
             return
 
         # 2. Stations-Dict atomar umbenennen
@@ -730,16 +762,16 @@ class Netzplaner:
         self.draw_lines()
 
     # Erfolgsmeldung
-        messagebox.showinfo("Umbenannt", f"Station '{station}' wurde zu '{new}' umbenannt.")
+        messagebox.showinfo(self.strings["Umbenannt"], self.strings["Station '/station' wurde zu '/new' umbenannt."].replace("/station", station).replace("/new", new))
 
     def confirmDeletion(self, line, window):
-        confirm = messagebox.askyesno("Löschen bestätigen", f"Möchtest du die Linie '{line[0][0]}' wirklich löschen?")
+        confirm = messagebox.askyesno(self.strings["Löschen bestätigen"], self.strings["Möchtest du die Linie '/line[0][0]' wirklich löschen?"].replace("/line[0][0]", line[0][0]))
         if confirm:
             if line in self.lines:
                 self.lines.remove(line)
                 self.draw_lines()
                 window.destroy()
-                messagebox.showinfo("Gelöscht", f"Die Linie '{line[0][0]}' wurde gelöscht.")
+                messagebox.showinfo(self.strings["Gelöscht"], self.strings["Die Linie '/line[0][0]' wurde gelöscht."].replace("/line[0][0]", line[0][0]))
 
     
     def delete_station(self, station):
@@ -766,7 +798,7 @@ class Netzplaner:
         
     def changeName(self, line):
         self.lines.remove(line)
-        new = simpledialog.askstring("Neuer Name", f"Was soll der neue Name der Linie {line[0][0]} sein?")
+        new = simpledialog.askstring(self.strings["Neuer Name"], self.strings["Was soll der neue Name der Linie /line[0][0] sein?"].replace("/line[0][0]", line[0][0]))
         if new:
             line[0][0] = new
             self.lines.append(line)
@@ -780,7 +812,7 @@ class Netzplaner:
             self.draw_lines()
     def changeTime(self, Line, number):
         self.lines.remove(Line)
-        new = simpledialog.askinteger("Zeit", f"Was soll die neue Reisezeit sein? (Die alte war {Line[-2][number]})")
+        new = simpledialog.askinteger(self.strings["Zeit"], self.strings["Was soll die neue Reisezeit sein? (Die alte war /Line[-2][number])"].replace("/Line[-2][number]", Line[-2][number]))
         if new:
             newList = Line[-2]
             newList[number] = new
@@ -799,25 +831,25 @@ class Netzplaner:
         count = 0
         
 
-        name = tk.Label(self.info, text=f"Name: {line[0][0]}")
-        color = tk.Label(self.info, text=f"Farbe: {line[-1]}", bg=f"{line[-1]}")
+        name = tk.Label(self.info, text=f'{self.strings["Name:"]} {line[0][0]}')
+        color = tk.Label(self.info, text=f'{self.strings["Farbe:"]} {line[-1]}", bg=f"{line[-1]}')
         name.pack()
         color.pack()
 
         delete_button = tk.Button(
             self.info,
-            text="Diese Linie löschen",
+            text=self.strings["Diese Linie löschen"],
             fg="black",
             command=lambda: self.confirmDeletion(line, self.info)
         )
         delete_button.pack(pady=10)
 
-        overStations = tk.LabelFrame(self.info, text="Stationen:", relief="solid")
+        overStations = tk.LabelFrame(self.info, text=self.strings["Stationen:"], relief="solid")
         overStations.pack()
         self.info.bind("<Shift-Escape>", self.close_all_except_root)
-        recolor_button = tk.Button(self.info, text="Farbe ändern", command=lambda line=line:self.changeColor(line=line))
+        recolor_button = tk.Button(self.info, text=self.strings["Farbe ändern"], command=lambda line=line:self.changeColor(line=line))
         recolor_button.pack()
-        rename_button = tk.Button(self.info, text="Namen ändern", command=lambda line=line: self.changeName(line=line))
+        rename_button = tk.Button(self.info, text=self.strings["Namen ändern"], command=lambda line=line: self.changeName(line=line))
         rename_button.pack()
 
 
@@ -850,7 +882,7 @@ class Netzplaner:
             count += 1
 
 
-        self.info.title(f"Information zur {line[0][0]} ({count} Station(en))")
+        self.info.title(self.strings["Information zur /line[0][0] (/count Station(en))"].replace("/line[0][0]", line[0][0]).replace("/count", count))
         self.info.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Rückkehr zur normalen Darstellung, wenn Fenster geschlossen wird
@@ -866,12 +898,12 @@ class Netzplaner:
                 stationW = tk.Toplevel(self.master)
                 stationW.bind("<Shift-Escape>", self.close_all_except_root)
                 # self.lines: [(Name, identification_number[(koor, dina, ten, "name1"), (koor, dina, ten, "name2")], "color")]
-                name = tk.Label(stationW, text=f"Name: {station}")
+                name = tk.Label(stationW, text=f'{self.strings["Name:"]} {station}')
                 name.pack()
                 
-                coords = tk.Label(stationW, text=f"Koordinaten: {self.stations[station]}")
+                coords = tk.Label(stationW, text=f'{self.strings["Koordinaten:"]} {self.stations[station]}')
                 coords.pack()
-                Ueber= tk.Label(stationW, text="vorbeikommende Linien:")
+                Ueber= tk.Label(stationW, text=self.strings["vorbeikommende Linien:"])
                 Ueber.pack()
                 for line in self.lines:
                     linename = line[0][0]
@@ -884,18 +916,18 @@ class Netzplaner:
                             inter = tk.Button(stationW, text=linename, bg=f"{color}", command=lambda line=line, station=station: self.lineinfo(line=line, station=station))
                             inter.pack()
                         
-                renameButton = tk.Button(stationW, text=f"{station} umbenennen", command=lambda station=station: self.rename(station=station))
+                renameButton = tk.Button(stationW, text=self.strings["/station umbenennen"].replace("/station", station), command=lambda station=station: self.rename(station=station))
                 renameButton.pack()
-                deleteButton = tk.Button(stationW, text=f"{station} löschen", command=lambda station=station: self.delete_station(station=station))
+                deleteButton = tk.Button(stationW, text=self.strings["/station löschen"].replace("/station", station), command=lambda station=station: self.delete_station(station=station))
                 deleteButton.pack()
-                stationW.title(f"{station} - Menü")
+                stationW.title(self.strings["/station - Menü"].replace("/station", station))
                 if self.RouteFinder == False:
-                    startFinding = tk.Button(stationW, text=f"Routenplanung von {station} starten", command=lambda start_station=station: self.startRouteFinding(start_station=station))
+                    startFinding = tk.Button(stationW, text=self.strings["Routenplanung von /station starten"].replace("/station", station), command=lambda start_station=station: self.startRouteFinding(start_station=station))
                     startFinding.pack()
                 else:
-                    ToHere = tk.Button(stationW, text=f"Routenplanung bei {station} beenden", command=lambda stop_station=station: self.stopRouteFinding(stop_station=station))
+                    ToHere = tk.Button(stationW, text=self.strings["Routenplanung bei /station beenden"].replace("/station", station), command=lambda stop_station=station: self.stopRouteFinding(stop_station=station))
                     ToHere.pack()
-                intermediate = tk.Button(stationW, text="Diese Station als Umsteigestation hinzufügen", command=lambda station=station: self.intermediateStopAtWindow(station=station))
+                intermediate = tk.Button(stationW, text=self.strings["Diese Station als Umsteigestation hinzufügen"], command=lambda station=station: self.intermediateStopAtWindow(station=station))
                 intermediate.pack()
                 if station in self.bau:
                     for project in self.bau[station]:
@@ -905,13 +937,13 @@ class Netzplaner:
                         except KeyError:
                             self.bau.uprade({station: []})
                 
-                addBuildLabel = tk.Label(stationW, text="Bauprojekt hinzufügen", bg="yellow")
+                addBuildLabel = tk.Label(stationW, text=self.strings["Bauprojekt hinzufügen"], bg="yellow")
                 addBuildLabel.pack()
                 self.addBuild = tk.Entry(stationW, width=30)
                 self.addBuild.pack()
-                addBuildButton = tk.Button(stationW, text="Bauarbeit hinzufügen", command=lambda station=station: self.addWIP(station=station))
+                addBuildButton = tk.Button(stationW, text=self.strings["Bauarbeit hinzufügen"], command=lambda station=station: self.addWIP(station=station))
                 addBuildButton.pack()
-                ripBuildButton = tk.Button(stationW, text="Bauprojekt beenden", command=lambda station=station: self.ripWIP(station=station))
+                ripBuildButton = tk.Button(stationW, text=self.strings["Bauprojekt beenden"], command=lambda station=station: self.ripWIP(station=station))
                 ripBuildButton.pack()
     def intermediateStopAtWindow(self, station):
         if station:
@@ -923,11 +955,11 @@ class Netzplaner:
         else:
             self.bau.update({station: [newWIP]})
     def ripWIP(self, station):
-              rip = simpledialog.askstring("Bauarbeiten beenden", "Welches Bauprojekt möchtest du beenden?")
+              rip = simpledialog.askstring(self.strings["Bauarbeiten beenden"], self.strings["Welches Bauprojekt möchtest du beenden?"])
               if rip in self.bau[station]:
                   self.bau[station].remove(rip)
               else:
-                  messagebox.showerror("Fehler", f"Es gibt die Bauarbeit oder das Bauprojekt {rip} nicht!")
+                  messagebox.showerror(self.strings["Fehler"], self.strings["Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!"].replace("/rip", rip))
 
     def searchF(self):
         self.search = self.searchEntry.get()

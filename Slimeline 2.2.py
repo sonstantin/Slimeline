@@ -185,17 +185,17 @@ class Netzplaner:
         graphical.grid(row=0, column=0)
         canvasbgEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="bla", canvasBG="", width="bla": self.setOptions(uiBG="bla", canvasBG="", width="bla"))
         canvasbgEntry.grid(row=0, column=1)
-        canvasbgLabel = tk.Label(graphical, text="Hintergrund des Plans bestimmen:")
+        canvasbgLabel = tk.Label(graphical, text=self.strings["Hintergrund des Plans bestimmen:"])
         
         
         canvasbgLabel.grid(row=0, column=0)
         
-        uiLabel = tk.Label(graphical, text="Hintergrund der Benutzeroberfläche bestimmen:")
+        uiLabel = tk.Label(graphical, text=self.strings["Hintergrundfarbe wählen"])
         uiLabel.grid(row=1, column=0)
         uiEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="", canvasBG="bla", width="bla": self.setOptions(uiBG="", canvasBG="bla", width="bla"))
         uiEntry.grid(row=1, column=1)
         
-        widthLabel = tk.Label(graphical, text="Breite der Linien bestimmen:")
+        widthLabel = tk.Label(graphical, text=self.strings["Breite der Linien bestimmen:"])
         widthLabel.grid(row=2, column=0)
         
         widthEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda canvasBG="bla", uiBG="bla", width="": self.setOptions(canvasBG="bla", uiBG="bla", width=""))
@@ -206,6 +206,7 @@ class Netzplaner:
 
         tk.Button(lingual, text="Deutsch", command=lambda language="Deutsch": self.set_language(language=language)).pack()
         tk.Button(lingual, text="English", command=lambda language="Englisch": self.set_language(language=language)).pack()
+        tk.Button(lingual, text="Latinum", command=lambda language="Latein": self.set_language(language=language)).pack()
        
     def saveOrLoad(self):
         Auswahl = tk.Toplevel(self.master)

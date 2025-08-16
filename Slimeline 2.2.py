@@ -476,7 +476,7 @@ class Netzplaner:
             
 
             stations = " → ".join(point[2] for point in points)
-            self.listbox.insert(tk.END, "Linie /name: /stations (Farbe: /color)".replace("/name", name).replace("/stations", stations).replace("/color", color))
+            self.listbox.insert(tk.END, self.strings["Linie /name: /stations (Farbe: /color)"].replace("/name", name).replace("/stations", stations).replace("/color", color))
 
         scrollbar.config(command=self.listbox.yview)
         delete_button = tk.Button(self.connection_window, text=self.strings["Ausgewählte Linie löschen"], command=self.delete_selected_connection)

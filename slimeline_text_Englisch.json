@@ -12,6 +12,8 @@
     "Routenplaner öffnen": "Open Route Planner",
     "Optionen": "Options",
     "Hintergrundfarbe wählen": "Choose Backgroundcolor",
+    "Breite der Linien bestimmen:": "Choose the width of the lines",
+    "Hintergrund des Plans bestimmen:": "Choose the background of your network",
     "Breite": "Width",
     "Wie breit sollen deine Linien sein? Die Aktuelle Breite beträgt": "How wide should the lines be?\nThe current width is self.width",
     "Einstellungen": "Options",
@@ -36,6 +38,7 @@
     "Sekunde": "Second",
     "Sekunden": "Seconds",
     "Route von /start_station nach /end_station": "Route from start_station to end_station",
+    
     "Kürzeste Route von /start_station nach /end_station (/minutes /minuteLabel und /seconds /secondLabel):": "Shortest Route from /start_station to /end_station (/minutes /minuteLabel and /seconds /secondLabel)",
     "Komplexe Stationserstellung": "Complex station creation",
     "Hier soll der Name der Station eingegeben werden:": "Enter the name of the station here:",

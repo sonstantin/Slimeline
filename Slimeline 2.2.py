@@ -5,7 +5,7 @@ from tkinter import colorchooser, simpledialog, messagebox
 import pickle, json
 from PIL import Image, ImageTk
 import requests
-import sys, os
+import sys, os, pyperclip
 
 try:
 
@@ -991,8 +991,12 @@ try:
     if __name__ == "__main__":
         root = tk.Tk()
         netzplaner = Netzplaner(root)
+        netzplaner = 1
         netzplaner.run()
 
 except Exception as e:
-    messagebox.showerror("Error", e)
+    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    messagebox.showerror("Error", f"{e}\n\n\nPlease report the error here. We copied the link in your clipboard. If you press 'OK', we will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
+    pyperclip.copy(e)
+    
     quit()

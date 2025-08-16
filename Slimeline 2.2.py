@@ -624,10 +624,14 @@ class Netzplaner:
         if filename:
             if not filename.endswith(".json"):
                 filename += ".json"
+            data = {
+                "lines": self.lines,
+                "stations": self.stations,
+                "build": self.bau
+            }
             with open(filename, mode="w", encoding="utf-8") as f:
-                json.dump([self.lines, self.stations], f)
-            with open("Bau " + filename, mode="w", encoding="utf-8") as build:
-                json.dump(self.bau, build)
+                json.dump(data, f, indent=4, ensure_ascii=False)
+            
             messagebox.showinfo(self.strings["Gespeichert"], self.strings["Netzplan wurde als '/filename' gespeichert."].replace("/filename", filename))
             
     def load_plan(self, event=None):
@@ -638,23 +642,19 @@ class Netzplaner:
                 filename += ".json"
             try:
                 with open(filename,mode="r", encoding="utf-8") as f:
-                    liste = json.load(f)
-                    self.lines = liste[0]
-                    self.stations = liste[1]
+                    data = json.load(f)
+                    self.lines = data["lines"]
+                    self.stations = data["stations"]
+                    self.bau = data["build"]
             except FileNotFoundError:
                 messagebox.showerror(self.strings["Fehler"], self.strings["Datei '/filename' wurde nicht gefunden."].replace("/filename", filename))
                 return
 
-            try:
-                with open("Bau " + filename, mode="r", encoding="utf-8") as build:
-                    self.bau = json.load(build)
-            except FileNotFoundError:
-                messagebox.showerror(self.strings["Fehler"], self.strings["Datei 'Bau /filename' wurde nicht gefunden."].replace("/filename", filename))
-                self.bau = {}  # Notfalls leeren, aber weitermachen
+             # Notfalls leeren, aber weitermachen
             
 
             self.draw_lines()  # Jetzt korrekt nach dem Laden
-            messagebox.showinfo(self.strings["Geladen"], self.strings["Netzplan '/filename' wurde geladen. Stationen: /self.stations"].replace("/filename", filename))
+            messagebox.showinfo(self.strings["Geladen"], self.strings["Netzplan '/filename' wurde geladen. Stationen: /self.stations"].replace("/filename", filename).replace("/self.stations", f"{self.stations}"))
 
                 
             print(self.stations)

@@ -1,0 +1,149 @@
+{
+    "Slimeline wird geladen": "Slimeline wird geladen",
+    "Das inizialisieren von Slimeline war erfolgreich!": "Das inizialisieren von Slimeline war erfolgreich!",
+    "Umsteigemöglichkeit hinzufügen": "Umsteigemöglichkeit hinzufügen",
+    "Linie erstellen": "Linie erstellen",
+    "Liste der Stationen und Verbindungen": "Liste der Stationen und Verbindungen",
+    "Linienfarbe wählen": "Linienfarbe wählen",
+    "Speichern/Laden": "Speichern/Laden",
+    "Bau-Modus deaktivieren": "Bau-Modus deaktivieren",
+    "Bau-Modus aktivieren": "Bau-Modus aktivieren",
+    "Routenplaner öffnen": "Routenplaner öffnen",
+    "Optionen": "Optionen",
+    
+    "Hintergrundfarbe wählen": "Hintergrundfarbe wählen",
+    "Breite": "Breite",
+    "Wie breit sollen deine Linien sein? Die Aktuelle Breite beträgt": "Wie breit sollen deine Linien sein? \nDie Aktuelle Breite beträgt self.width",
+
+    "Hintergrund der Benutzeroberfläche bestimmen:": "Hintergrund der Benutzeroberfläche bestimmen:",
+    "Breite der Linien bestimmen:": "Breite der Linien bestimmen:",
+    "Hintergrund des Plans bestimmen:": "Hintergrund des Plans bestimmen:",
+    "Sprache": "Sprache",
+    "Einstellungen": "Einstellungen",
+    "Graphische Einstellungen": "Graphische Einstellungen",
+    "Bestimmen": "Bestimmen",
+
+    "Auswahl zum Speichern oder Laden": "Auswahl zum Speichern oder Laden",
+    "Speichern": "Speichern",
+    "Laden": "Laden",
+
+    "Routenplaner": "Routenplaner",
+    "Startstation:": "Startstation:",
+    "Zielstation:": "Zielstation:",
+    "Route berechnen": "Route berechnen",
+
+    "Listen": "Listen",
+    "Liste aller Stationen zeigen": "Liste aller Stationen zeigen",
+    "Liste aller Verbindungen zeigen": "Liste aller Verbindungen zeigen",
+    "Fehler": "Fehler",
+    "Die Startstation 'start_station' existiert nicht.": "Die Startstation 'start_station' existiert nicht.",
+    "Die Zielstation 'end_station' existiert nicht.": "Die Zielstation 'end_station' existiert nicht.",
+    "Es gibt keine Verbindung zwischen den Stationen.": "Es gibt keine Verbindung zwischen den Stationen.",
+    "Minute": "Minute",
+    "Minuten": "Minuten",
+    "Sekunde": "Sekunde",
+    "Sekunden": "Sekunden",
+    "Route von /start_station nach /end_station": "Route von start_station nach end_station",
+    "Kürzeste Route von /start_station nach /end_station (/minutes /minuteLabel und /seconds /secondLabel):": "Kürzeste Route von /start_station nach /end_station (/minutes /minuteLabel und /seconds /secondLabel):",
+
+
+
+    "Komplexe Stationserstellung": "Komplexe Stationserstellung",
+    "Hier soll der Name der Station eingegeben werden:": "Hier soll der Name der Station eingegeben werden:",
+    "Weiter ->": "Weiter ->",
+
+    "Was soll die x Koordinate, also die Koordinate von links nach rechts sein?": "Was soll die x Koordinate, also die Koordinate von links nach rechts sein?",
+    "Was soll die y Koordinate, also die Koordinate von oben nach unten sein?": "Was soll die y Koordinate, also die Koordinate von oben nach unten sein?",
+    "X-Koordinate": "X-Koordinate",
+    "Y-Koordinate": "Y-Koordinate",
+
+    "Bestätigen": "Bestätigen",
+    "Willst du wirklich eine Station ohne Namen erstellen?": "Willst du wirklich eine\nStation ohne Namen\nerstellen?",
+    "Station wird erstellt: /name": "Station wird erstellt: /name",
+
+
+
+    "Keine Verbindungen": "Keine Verbindungen",
+    "Es sind keine Verbindungen vorhanden.": "Es sind keine Verbindungen vorhanden.",
+    "Linien": "Linien",
+    "Linie /name: /stations (Farbe: /color)": "Linie /name: /stations (Farbe: /color)",
+    "Ausgewählte Linie löschen": "Ausgewählte Linie löschen",
+
+    "Keine Auswahl": "Keine Auswahl",
+    "Bitte eine Verbindung auswählen.": "Bitte eine Verbindung auswählen.",
+
+    "Bitte geben Sie den Namen der Station ein:": "Bitte geben Sie den Namen der Station ein:",
+
+    "Name": "Name",
+    "Wie soll der Name der Linie lauten?": "Wie soll der Name der Linie lauten?",
+    "Anhängen": "Anhängen",
+    "Es gibt schon eine Linie namens /name, willst du die neue anhängen?": "Es gibt schon eine Linie namens /name, willst du die neue anhängen?",
+    "Zeit": "Zeit",
+    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):",
+
+
+    "Speichern unter": "Speichern unter",
+    "Dateiname für den Netzplan eingeben: (Merken Sie sich den Namen der Datei!)": "Dateiname für den Netzplan eingeben: \n(Merken Sie\nsich den Namen der Datei!)",
+    "Gespeichert": "Gespeichert",
+    "Netzplan wurde als '/filename' gespeichert.": "Netzplan wurde als '/filename' gespeichert.",
+
+    "Name der Datei, die geladen werden soll:": "Name der Datei, die geladen werden soll:",
+    "Datei '/filename' wurde nicht gefunden.": "Datei '/filename' wurde nicht gefunden.",
+    "Datei 'Bau /filename' wurde nicht gefunden.": "Datei 'Bau /filename' wurde nicht gefunden.",
+    "Geladen": "Geladen",
+    "Netzplan '/filename' wurde geladen. Stationen: /self.stations": "Netzplan '/filename' wurde geladen.\n\nStationen:\n/self.stations",
+
+
+    "Linie von /name erstellen": "Linie von /name erstellen",
+
+
+    "Liste aller Stationen": "Liste aller Stationen",
+    "Suchen": "Suchen",
+    "Liste aller Stationen (insgesamt /count)": "Liste aller Stationen (insgesamt /count)",
+
+    "/station umbenennen": "/station umbenennen",
+    "Wie soll /station in Zukunft heissen": "Wie soll /station in Zukunft heissen",
+
+    "Name '/new' existiert bereits!": "Name '/new' existiert bereits!",
+    "Umbenannt": "Umbenannt",
+    "Station '/station' wurde zu '/new' umbenannt.": "Station '/station' wurde zu '/new' umbenannt.",
+
+    "Löschen bestätigen": "Löschen bestätigen",
+    "Möchtest du die Linie '/line[0][0]' wirklich löschen?": "Möchtest du die Linie '/line[0][0]' wirklich löschen?",
+    "Gelöscht": "Gelöscht",
+    "Die Linie '/line[0][0]' wurde gelöscht.": "Die Linie '/line[0][0]' wurde gelöscht.",
+
+
+
+    "Neuer Name": "Neuer Name",
+    "Was soll der neue Name der Linie /line[0][0] sein?": "Was soll der neue Name der Linie /line[0][0] sein?",
+
+
+    "Was soll die neue Reisezeit sein? (Die alte war /Line[-2][number])": "Was soll die neue Reisezeit sein? (Die alte war /Line[-2][number])",
+
+    "Name:": "Name:",
+    "Farbe:": "Farbe:",
+    "Diese Linie löschen": "Diese Linie löschen",
+    "Stationen:": "Stationen:",
+    "Farbe ändern": "Farbe ändern",
+    "Namen ändern": "Namen ändern",
+    "Information zur /line[0][0] (/count Station(en))": "Information zur /line[0][0] (/count Station(en))",
+
+
+    "Koordinaten:": "Koordinaten:",
+    "vorbeikommende Linien:": "vorbeikommende Linien:",
+    "/station löschen": "/station löschen",
+    "/station - Menü": "/station - Menü",
+    "Routenplanung von /station starten": "Routenplanung von /station starten",
+    "Routenplanung bei /station beenden": "Routenplanung bei /station beenden",
+    "Diese Station als Umsteigestation hinzufügen": "Diese Station als Umsteigestation hinzufügen",
+    "Bauprojekt hinzufügen": "Bauprojekt hinzufügen",
+    "Bauarbeit hinzufügen": "Bauarbeit hinzufügen",
+    "Bauprojekt beenden": "Bauprojekt beenden",
+
+    "Welches Bauprojekt möchtest du beenden?": "Welches Bauprojekt möchtest du beenden?",
+    "Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!": "Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!",
+
+    "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):"
+    
+}

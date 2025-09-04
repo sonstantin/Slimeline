@@ -1,4 +1,6 @@
 {
+    "Takt": "Headway",
+    "Was soll der Takt der neuen Linie sein?": "What should the headway be?",
     "Sprache": "Language",
     "Slimeline wird geladen": "Slimeline is loading",
     "Das inizialisieren von Slimeline war erfolgreich!": "Slimeline was inzialized succesfull!",
@@ -111,3 +113,4 @@
     "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Time between /new_points[i][2] and /new_points[i+1][2] (in seconds):"
 
 }
+

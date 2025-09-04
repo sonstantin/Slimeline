@@ -79,7 +79,7 @@
     "Anhängen": "Anhängen",
     "Es gibt schon eine Linie namens /name, willst du die neue anhängen?": "Es gibt schon eine Linie namens /name, willst du die neue anhängen?",
     "Zeit": "Zeit",
-    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):",
+    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Zeit zwischen /new_points[j][2] und /new_points[j+1][2]:",
 
 
     "Speichern unter": "Speichern unter",
@@ -146,4 +146,5 @@
 
     "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):"
     
+
 }

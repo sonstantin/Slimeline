@@ -63,7 +63,7 @@
     "Anhängen": "Connect",
     "Es gibt schon eine Linie namens /name, willst du die neue anhängen?": "There is a line calles /name yet, do you want to add the new part?",
     "Zeit": "Time",
-    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Time between /new_points[j][2] and /new_points[j+1][2] (in Seconds)",
+    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Time between /new_points[j][2] and /new_points[j+1][2]:",
     "Speichern unter": "Save as",
     "Dateiname für den Netzplan eingeben: (Merken Sie sich den Namen der Datei!)": "Enter name for the network:\n(Remember the\nname of the file)",
     "Gespeichert": "Save",
@@ -109,4 +109,5 @@
     "Welches Bauprojekt möchtest du beenden?": "Which building project do you want to end?",
     "Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!": "There is no Construction work called /rip!",
     "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Time between /new_points[i][2] and /new_points[i+1][2] (in seconds):"
+
 }

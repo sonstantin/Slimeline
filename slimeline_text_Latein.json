@@ -62,7 +62,7 @@
     "Anhängen": "Commitere",
     "Es gibt schon eine Linie namens /name, willst du die neue anhängen?": "Iam Linea cum nomine '/name', cupisne commitere?",
     "Zeit": "Tempus",
-    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Tempus inter /new_points[j][2] et /new_points[j+1][2] (quam partes minutae secundae):",
+    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Tempus inter /new_points[j][2] et /new_points[j+1][2]:",
     "Speichern unter": "Serva tamquam",
     "Dateiname für den Netzplan eingeben: (Merken Sie sich den Namen der Datei!)": "Delige nominem pro consilio:\n(Depone nominem in memoriis!)",
     "Gespeichert": "Servabatur",

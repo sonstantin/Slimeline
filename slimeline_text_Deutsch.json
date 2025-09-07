@@ -1,4 +1,9 @@
 {
+    "Endstation": "Endstation",
+    "Art der Zeit": "Art der Zeit",
+    "nächste Abfahrt:": "nächste Abfahrt:",
+    "Takt:": "Takt:",
+    "Alle Linien (insgesamt /count)": "Alle Linien (insgesamt /count)",
     "Takt": "Takt",
     "Was soll der Takt der neuen Linie sein?": "Was soll der Takt der neuen Linie sein?",
     "Slimeline wird geladen": "Slimeline wird geladen",
@@ -81,7 +86,7 @@
     "Anhängen": "Anhängen",
     "Es gibt schon eine Linie namens /name, willst du die neue anhängen?": "Es gibt schon eine Linie namens /name, willst du die neue anhängen?",
     "Zeit": "Zeit",
-    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Zeit zwischen /new_points[j][2] und /new_points[j+1][2]:",
+    "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):": "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):",
 
 
     "Speichern unter": "Speichern unter",
@@ -148,6 +153,4 @@
 
     "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):"
     
-
 }
-

@@ -368,12 +368,12 @@ try:
 
             # ---- GUI ----
             route_window = tk.Toplevel(self.master)
-            route_window.title(f"Route von {start_station} nach {end_station}")
+            route_window.title(f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station}")
 
             title = tk.Label(
                 route_window,
                 text=(
-                    f"Kürzeste Route von {start_station} nach {end_station} "
+                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} "
                     f"({minutes} {minuteLabel} und {seconds} {secondLabel})"
                 ),
                 font=("Arial", 12, "bold")
@@ -383,7 +383,7 @@ try:
             # show total platform waiting time
             wait_label = tk.Label(
                 route_window,
-                text=f"Gesamte Wartezeit auf Bahnsteigen: {wait_min} min {wait_sec} s",
+                text=f"{self.strings['Gesamte Wartezeit auf Bahnsteigen']} {wait_min} min {wait_sec} s",
                 font=("Arial", 11, "italic")
             )
             wait_label.pack(pady=5)
@@ -415,9 +415,9 @@ try:
 
                     parts = []
                     if travel_time:
-                        parts.append(f"{travel_time // 60} min {travel_time % 60} s Fahrt")
+                        parts.append(f"{travel_time // 60} min {travel_time % 60} s {self.strings['Fahrt']}")
                     if wait_time:
-                        parts.append(f"{wait_time // 60} min {wait_time % 60} s Warten")
+                        parts.append(f"{wait_time // 60} min {wait_time % 60} s {self.strings['Warten']}")
 
                     time_str = f" ({' + '.join(parts)})" if parts else ""
                     text_parts[-1] = (text_parts[-1][0] + time_str + "]", color)

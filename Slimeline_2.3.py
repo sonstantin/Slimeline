@@ -143,6 +143,7 @@ try:
             
             self.master.protocol("WM_DELETE_WINDOW", quit)
             self.update_clock()
+            self.takt = {}
             
         def update_clock(self):
             jetzt = datetime.now()
@@ -295,95 +296,165 @@ try:
             OfLines = tk.Button(ask, text=self.strings["Liste aller Verbindungen zeigen"], command=self.showListOfConnectionsToDelete)
             OfLines.pack()
 
+
+        def calculate_wait_time(self, current_time, takt_in_seconds):
+            
+            if not isinstance(takt_in_seconds, int) or takt_in_seconds == 0:
+                return 0  # Kein Takt vorhanden
+
+            remainder = current_time % takt_in_seconds
+            wait_time = takt_in_seconds - remainder if remainder != 0 else 0
+            return wait_time
+        def get_travel_time(self, from_station, to_station, line_name):
+            for line_data in self.lines:
+                if line_data[0][0] != line_name:
+                    continue
+                points, times = line_data[1], line_data[2]
+                for i in range(len(points) - 1):
+                    if (points[i][2] == from_station and points[i+1][2] == to_station) or \
+                    (points[i+1][2] == from_station and points[i][2] == to_station):
+                        t = times[i]
+                        # ⬇ Convert safely to int
+                        if isinstance(t, list) and t:
+                            t = t[0]
+                        return int(t)
+            return 0
+
+
         def calculate_route(self):
             start_station = self.start_entry.get()
-            end_station = self.end_entry.get()
+            end_station   = self.end_entry.get()
 
             if start_station not in self.stations:
-                messagebox.showerror(self.strings["Fehler"], self.strings["Die Startstation 'start_station' existiert nicht."].replace("start_station", f"{start_station}"))
+                messagebox.showerror(self.strings["Fehler"],
+                                    f"Die Startstation '{start_station}' existiert nicht.")
                 return
             if end_station not in self.stations:
-                messagebox.showerror(self.strings["Fehler"], self.strings["Die Zielstation 'end_station' existiert nicht."].replace("end_station", f"{end_station}"))
+                messagebox.showerror(self.strings["Fehler"],
+                                    f"Die Zielstation '{end_station}' existiert nicht.")
                 return
 
-            distances, previous_stations, previous_lines, segment_times = self.dijkstra(start_station)
+            (distances, previous_stations,
+            previous_lines, segment_times,
+            wait_times) = self.dijkstra(start_station)    # <-- collect wait_times
 
             if distances[end_station] == float('inf'):
-                messagebox.showinfo(self.strings["Fehler"], self.strings["Es gibt keine Verbindung zwischen den Stationen."])
+                messagebox.showinfo(self.strings["Fehler"],
+                                    self.strings["Es gibt keine Verbindung zwischen den Stationen."])
                 return
 
-            # Route rekonstruieren
-            path = []
-            lines_used = []
+            # ---- Route rekonstruieren ----
+            path, lines_used = [], []
             station = end_station
             while station:
                 path.insert(0, station)
                 lines_used.insert(0, previous_lines.get(station))
                 station = previous_stations[station]
 
-            # Abschnittszeiten aufbauen
-            times_used = []
-            for i in range(len(path)):
-                if i == 0:
-                    times_used.append(0)
-                else:
-                    times_used.append(segment_times.get(path[i], 0))
+            times_used = [0]
+            waits_used = [0]                               # <-- NEW
+            for i in range(1, len(path)):
+                times_used.append(segment_times.get(path[i], 0))
+                waits_used.append(wait_times.get(path[i], 0))
 
-            # Gesamtzeit berechnen
             total_seconds = distances[end_station]
-            minutes = total_seconds // 60
-            seconds = total_seconds % 60
+            minutes, seconds = divmod(total_seconds, 60)
             minuteLabel = self.strings["Minute"] if minutes == 1 else self.strings["Minuten"]
             secondLabel = self.strings["Sekunde"] if seconds == 1 else self.strings["Sekunden"]
 
-            # GUI anzeigen
+            # --- total waiting time across the route ---
+            total_wait = sum(waits_used)
+            wait_min, wait_sec = divmod(total_wait, 60)
+
+            # ---- GUI ----
             route_window = tk.Toplevel(self.master)
-            route_window.title("Route von start_station nach end_station".replace("/start_station", start_station).replace("/end_station", end_station))
+            route_window.title(f"Route von {start_station} nach {end_station}")
 
             title = tk.Label(
                 route_window,
-                text=self.strings["Kürzeste Route von /start_station nach /end_station (/minutes /minuteLabel und /seconds /secondLabel):"].replace("/start_station", start_station).replace("/end_station", end_station).replace("/minutes", str(minutes)).replace("/minuteLabel", minuteLabel).replace("/seconds", str(seconds)).replace("/secondLabel", secondLabel),
+                text=(
+                    f"Kürzeste Route von {start_station} nach {end_station} "
+                    f"({minutes} {minuteLabel} und {seconds} {secondLabel})"
+                ),
                 font=("Arial", 12, "bold")
             )
             title.pack(pady=10)
+
+            # show total platform waiting time
+            wait_label = tk.Label(
+                route_window,
+                text=f"Gesamte Wartezeit auf Bahnsteigen: {wait_min} min {wait_sec} s",
+                font=("Arial", 11, "italic")
+            )
+            wait_label.pack(pady=5)
+
             route_window.bind("<Shift-Escape>", self.close_all_except_root)
+
             container = tk.Frame(route_window)
             container.pack(padx=10, pady=5)
+            distances, previous_stations, previous_lines, segment_times, wait_times = self.dijkstra(start_station)
+
+            total_wait = sum(wait_times.values())
+            print(f"Total platform wait time: {total_wait // 60} min {total_wait % 60} s")
 
             for i in range(len(path)):
-                segment_frame = tk.Frame(container, bg="#f0f0f0" if i % 2 == 0 else "#ffffff", pady=5)
+                segment_frame = tk.Frame(container,
+                                        bg="#f0f0f0" if i % 2 == 0 else "#ffffff",
+                                        pady=5)
                 segment_frame.pack(fill="x", padx=5, pady=1)
 
                 text_parts = []
-
                 if i > 0 and lines_used[i]:
                     line_name, color = lines_used[i]
                     text_parts.append(("→", "black"))
                     text_parts.append((f"[{line_name[0]}", color))
 
-                    # Abschnittsdauer
                     duration = times_used[i]
-                    minutes = duration // 60
-                    seconds = duration % 60
-                    time_str = f" ({minutes} min {seconds} s)" if minutes else f" ({seconds} s)"
+                    travel_time = self.get_travel_time(path[i-1], path[i], line_name)
+                    wait_time   = max(0, waits_used[i])        # <-- per-segment wait
+
+                    parts = []
+                    if travel_time:
+                        parts.append(f"{travel_time // 60} min {travel_time % 60} s Fahrt")
+                    if wait_time:
+                        parts.append(f"{wait_time // 60} min {wait_time % 60} s Warten")
+
+                    time_str = f" ({' + '.join(parts)})" if parts else ""
                     text_parts[-1] = (text_parts[-1][0] + time_str + "]", color)
 
                 text_parts.append((path[i], "black"))
 
                 for text, color in text_parts:
-                    label = tk.Label(segment_frame, text=text, font=("Arial", 12), fg=color, bg=segment_frame["bg"])
-                    label.pack(side="left", padx=5)
+                    tk.Label(segment_frame, text=text,
+                            font=("Arial", 12), fg=color,
+                            bg=segment_frame["bg"]).pack(side="left", padx=5)
+
+
+
 
 
 
                 
 
         def dijkstra(self, start_station):
+            # convert takt to seconds if it is a list like [600]
+            def takt_to_int(t):
+                if isinstance(t, list):
+                    # if list is empty or malformed treat as 0
+                    if not t:
+                        return 0
+                    return int(t[0])
+                try:
+                    return int(t)
+                except Exception:
+                    return 0
+
             distances = {station: float('inf') for station in self.stations}
             distances[start_station] = 0
             previous_stations = {station: None for station in self.stations}
             previous_lines = {station: None for station in self.stations}
             segment_times = {station: 0 for station in self.stations}
+            wait_times = {station: 0 for station in self.stations}   # NEW: track platform wait times
             visited = set()
 
             while len(visited) < len(self.stations):
@@ -399,31 +470,62 @@ try:
                     break
 
                 visited.add(min_station)
+                current_time = distances[min_station]
 
                 for line_data in self.lines:
-                    if len(line_data) == 4:
-                        (line_name, canvas_id), points, times, color = line_data
-                    else:
-                        continue  # alte Struktur überspringen
+                    if len(line_data) < 4:
+                        continue
+                    
+                    (line_name, canvas_id, takt), points, times, color = line_data
 
                     for i, (x, y, name) in enumerate(points):
-                        if name == min_station:
-                            neighbors = []
-                            if i > 0:
-                                neighbors.append((points[i - 1][2], times[i - 1]))
-                            if i < len(points) - 1:
-                                neighbors.append((points[i + 1][2], times[i]))
+                        if name != min_station:
+                            continue
 
-                            for neighbor, travel_time in neighbors:
-                                if neighbor not in visited:
-                                    new_distance = distances[min_station] + travel_time
-                                    if new_distance < distances[neighbor]:
-                                        distances[neighbor] = new_distance
-                                        previous_stations[neighbor] = min_station
-                                        previous_lines[neighbor] = (line_name, color)
-                                        segment_times[neighbor] = travel_time
+                        neighbors = []
+                        if i > 0:
+                            neighbors.append((points[i - 1][2], times[i - 1]))
+                        if i < len(points) - 1:
+                            neighbors.append((points[i + 1][2], times[i]))
 
-            return distances, previous_stations, previous_lines, segment_times
+                        for neighbor, travel_time_raw in neighbors:
+                            try:
+                                travel_time = int(travel_time_raw) if isinstance(travel_time_raw, (int, float)) else int(travel_time_raw[0])
+                            except Exception:
+                                travel_time = 0
+
+                            if neighbor in visited:
+                                continue
+
+                            # --- PLATFORM WAIT HANDLING ---
+                            prev_line = previous_lines[min_station]
+                            wait_time = 0
+
+                            if takt is None or takt == 0:
+                                avg_wait = 0
+                            else:
+                                print(takt)
+                                avg_wait = int(takt[0]) // 2   # assume average wait = half takt
+
+                            # if you are boarding the line for the first time OR transferring to another line
+                            if prev_line is None or prev_line[0] != line_name:
+                                wait_time = avg_wait
+                            else:
+                                wait_time = 0  # same line → no wait
+
+                            new_distance = current_time + wait_time + travel_time
+
+                            if new_distance < distances[neighbor]:
+                                distances[neighbor] = new_distance
+                                previous_stations[neighbor] = min_station
+                                previous_lines[neighbor] = (line_name, color)
+                                segment_times[neighbor] = travel_time + wait_time
+                                wait_times[neighbor] = wait_time
+
+            return distances, previous_stations, previous_lines, segment_times, wait_times
+
+
+
 
 
 
@@ -495,7 +597,8 @@ try:
         def add_intermediate_stop(self, station):
             if self.build_mode:
                 if station in self.stations:
-                    x, y = self.stations[station]
+                    x = self.stations[station][0]
+                    y = self.stations[station][1]
                     self.current_line.append((x, y, station))
                 else:
                     messagebox.showerror(self.strings["Fehler"], self.strings["Die Startstation 'start_station' existiert nicht.".replace("start_station", station)])
@@ -701,6 +804,8 @@ try:
                 #if count == len(times) -1:
                     #break
             print(self.stations)
+            print("===================")
+            print(self.takt)
             station_start_time = [0, 0, 0]  # [hour, minute, second]
 
             for station in self.lines[-1][1]:  # Assuming this is a list of station info
@@ -710,11 +815,11 @@ try:
                     stationname = station[2]  # Assuming station[2] is the station name
 
                     # Initialize the station entry if not already present
-                    if stationname not in self.stations:
-                        self.stations[stationname] = []
+                    if stationname not in self.takt:
+                        self.takt[stationname] = []
 
                     # Append the current time entry
-                    self.stations[stationname].append({
+                    self.takt[stationname].append({
                         name: {
                             f"{station_time[0]:02d}": {
                                 f"{station_time[1]:02d}": {
@@ -737,7 +842,9 @@ try:
                         station_time[0] += station_time[1] // 60
                         station_time[1] %= 60
 
-                
+            print(self.stations)
+            print("===================")
+            print(self.takt)
 
         def choose_color(self, event=None):
             color = colorchooser.askcolor(title=self.strings["Linienfarbe wählen"])
@@ -1067,7 +1174,7 @@ try:
                                     next_one = None
                                     departure = []
 
-                                    for entry in self.stations[station][2:]:  # Skip metadata
+                                    for entry in self.takt[station][2:]:  # Skip metadata
                                         if linename in entry:
                                             time_data = entry[linename]  # e.g., {"14": {"53": {"10": True}}}
 

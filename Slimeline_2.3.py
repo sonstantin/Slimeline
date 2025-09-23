@@ -437,46 +437,106 @@ try:
                 
 
         def dijkstra(self, start_station):
-            # convert takt to seconds if it is a list like [600]
-            def takt_to_int(t):
-                if isinstance(t, list):
-                    # if list is empty or malformed treat as 0
-                    if not t:
-                        return 0
-                    return int(t[0])
-                try:
+            # helper: convert takt stored in various shapes into plain seconds (int)
+            def _takt_to_int(t):
+                if isinstance(t, int):
+                    return t
+                if isinstance(t, float):
                     return int(t)
+                if isinstance(t, list) and t:
+                    return _takt_to_int(t[0])
+                if isinstance(t, str):
+                    s = t.strip()
+                    if s.isdigit():
+                        return int(s)
+                    # fallback: try float->int
+                    try:
+                        return int(float(s))
+                    except Exception:
+                        return 0
+                return 0
+
+            # helper: convert a travel_time raw value to int seconds
+            def _parse_travel_time(v):
+                if isinstance(v, (int, float)):
+                    return int(v)
+                if isinstance(v, list) and v:
+                    return _parse_travel_time(v[0])
+                if isinstance(v, str):
+                    s = v.strip()
+                    # support "M:S" or "MM:SS"
+                    if ":" in s:
+                        parts = s.split(":")
+                        try:
+                            if len(parts) == 2:
+                                return int(parts[0]) * 60 + int(parts[1])
+                            if len(parts) == 3:
+                                return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+                        except Exception:
+                            return 0
+                    try:
+                        return int(float(s))
+                    except Exception:
+                        return 0
+                return 0
+
+            # helper: read current clock from self.uhrzeit to seconds since midnight
+            def _current_clock_seconds():
+                u = getattr(self, "uhrzeit", None)
+                if not u:
+                    return 0
+                try:
+                    # u is either [H, M, S] or [H, M, S, "AM"/"PM"]
+                    hour = int(u[0])
+                    minute = int(u[1])
+                    second = int(u[2])
+                    if len(u) >= 4 and isinstance(u[3], str):
+                        ampm = u[3].upper()
+                        if ampm.startswith("P") and hour < 12:
+                            hour += 12
+                        if ampm.startswith("A") and hour == 12:
+                            hour = 0
+                    # clamp into valid ranges
+                    hour %= 24
+                    minute %= 60
+                    second %= 60
+                    return hour * 3600 + minute * 60 + second
                 except Exception:
                     return 0
 
+            # -- init --
             distances = {station: float('inf') for station in self.stations}
-            distances[start_station] = 0
+            start_time_seconds = _current_clock_seconds()
+            distances[start_station] = start_time_seconds   # <<--- use real clock time here
             previous_stations = {station: None for station in self.stations}
             previous_lines = {station: None for station in self.stations}
             segment_times = {station: 0 for station in self.stations}
-            wait_times = {station: 0 for station in self.stations}   # NEW: track platform wait times
+            wait_times = {station: 0 for station in self.stations}
             visited = set()
 
+            # Dijkstra main loop
             while len(visited) < len(self.stations):
-                # Nächste unbesuchte Station mit geringster Entfernung finden
-                min_distance = float('inf')
+                # find next unvisited with smallest distance
                 min_station = None
-                for station in self.stations:
-                    if station not in visited and distances[station] < min_distance:
-                        min_distance = distances[station]
-                        min_station = station
+                min_distance = float('inf')
+                for st in self.stations:
+                    if st not in visited and distances[st] < min_distance:
+                        min_distance = distances[st]
+                        min_station = st
 
                 if min_station is None:
                     break
 
                 visited.add(min_station)
-                current_time = distances[min_station]
+                current_time = distances[min_station]   # time (seconds) when we are AT min_station
 
                 for line_data in self.lines:
+                    # line_data expected: ((line_name, canvas_id, takt), points, times, color)
                     if len(line_data) < 4:
                         continue
-                    
-                    (line_name, canvas_id, takt), points, times, color = line_data
+
+                    (line_name, canvas_id, takt_raw), points, times, color = line_data
+                    takt_sec = _takt_to_int(takt_raw)
 
                     for i, (x, y, name) in enumerate(points):
                         if name != min_station:
@@ -489,30 +549,25 @@ try:
                             neighbors.append((points[i + 1][2], times[i]))
 
                         for neighbor, travel_time_raw in neighbors:
-                            try:
-                                travel_time = int(travel_time_raw) if isinstance(travel_time_raw, (int, float)) else int(travel_time_raw[0])
-                            except Exception:
-                                travel_time = 0
+                            travel_time = _parse_travel_time(travel_time_raw)
 
                             if neighbor in visited:
                                 continue
 
-                            # --- PLATFORM WAIT HANDLING ---
+                            # WAIT: compute wait at the station where you board (min_station),
+                            # using the current_time (arrival time at min_station).
                             prev_line = previous_lines[min_station]
                             wait_time = 0
-
-                            if takt is None or takt == 0:
-                                avg_wait = 0
-                            else:
-                                print(takt)
-                                avg_wait = int(takt[0]) // 2   # assume average wait = half takt
-
-                            # if you are boarding the line for the first time OR transferring to another line
                             if prev_line is None or prev_line[0] != line_name:
-                                wait_time = avg_wait
+                                # use your existing helper (it expects an int takt)
+                                if takt_sec > 0:
+                                    wait_time = self.calculate_wait_time(int(current_time), int(takt_sec))
+                                else:
+                                    wait_time = 0
                             else:
-                                wait_time = 0  # same line → no wait
+                                wait_time = 0  # staying on same line -> no platform wait
 
+                            # total time to reach neighbor = time at station + wait + riding time
                             new_distance = current_time + wait_time + travel_time
 
                             if new_distance < distances[neighbor]:
@@ -523,6 +578,7 @@ try:
                                 wait_times[neighbor] = wait_time
 
             return distances, previous_stations, previous_lines, segment_times, wait_times
+
 
 
 

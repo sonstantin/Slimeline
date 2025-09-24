@@ -9,6 +9,7 @@ import sys, os, pyperclip
 from datetime import datetime
 
 
+
 try:
 
 
@@ -145,6 +146,17 @@ try:
             self.update_clock()
             self.takt = {}
             
+            # Suppose you have a line definition in self.lines[0]
+            
+
+
+
+
+        
+
+        
+        
+                    
         def update_clock(self):
             jetzt = datetime.now()
             hour = jetzt.hour
@@ -246,7 +258,7 @@ try:
             temporal.grid(row=2, column=0)
             self.changeType = tk.Button(temporal, text="1-24", command=lambda language=language: self.toggle_clock(language=language))
             self.changeType.pack()
-        
+            
         def toggle_clock(self, language):
             if self.doEnglish == False:
                 self.doEnglish = True
@@ -373,7 +385,7 @@ try:
             title = tk.Label(
                 route_window,
                 text=(
-                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} "
+                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} "#hier
                     f"({minutes} {minuteLabel} und {seconds} {secondLabel})"
                 ),
                 font=("Arial", 12, "bold")
@@ -396,7 +408,7 @@ try:
 
             total_wait = sum(wait_times.values())
             print(f"Total platform wait time: {total_wait // 60} min {total_wait % 60} s")
-
+            insgesamt_time = wait_min * 60 + wait_sec
             for i in range(len(path)):
                 segment_frame = tk.Frame(container,
                                         bg="#f0f0f0" if i % 2 == 0 else "#ffffff",
@@ -407,7 +419,7 @@ try:
                 if i > 0 and lines_used[i]:
                     line_name, color = lines_used[i]
                     text_parts.append(("→", "black"))
-                    text_parts.append((f"[{line_name[0]}", color))
+                    text_parts.append((f"[{line_name}", color))
 
                     duration = times_used[i]
                     travel_time = self.get_travel_time(path[i-1], path[i], line_name)
@@ -416,14 +428,36 @@ try:
                     parts = []
                     if travel_time:
                         parts.append(f"{travel_time // 60} min {travel_time % 60} s {self.strings['Fahrt']}")
+                        insgesamt_time += travel_time
+                        f"({minutes} {minuteLabel} und {seconds} {secondLabel})"
+
                     if wait_time:
                         parts.append(f"{wait_time // 60} min {wait_time % 60} s {self.strings['Warten']}")
 
                     time_str = f" ({' + '.join(parts)})" if parts else ""
                     text_parts[-1] = (text_parts[-1][0] + time_str + "]", color)
 
-                text_parts.append((path[i], "black"))
 
+                seconds = insgesamt_time % 60
+                minutes = insgesamt_time // 60
+
+                if seconds > 1:
+                    secondLabel = self.strings["Sekunden"]
+                else:
+                    secondLabel = self.strings["Sekunde"]
+                
+                if minutes > 1:
+                    minuteLabel = self.strings["Minuten"]
+                else:
+                    minuteLabel = self.strings["Minute"]
+
+                text_parts.append((path[i], "black")) #FIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+                route_window,
+                title.config(text=(
+                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} ({minutes} {minuteLabel} und {seconds} {secondLabel})"
+                ),
+                font=("Arial", 12, "bold")
+                )
                 for text, color in text_parts:
                     tk.Label(segment_frame, text=text,
                             font=("Arial", 12), fg=color,
@@ -631,7 +665,7 @@ try:
                     name = self.nameE.get()
                 else:
                     return
-                if name == "/komplex":
+                if name == "/komplex" or name == "/complex":
                     self.komplexlinecreation()
                     return
 

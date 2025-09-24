@@ -441,12 +441,12 @@ try:
                 seconds = insgesamt_time % 60
                 minutes = insgesamt_time // 60
 
-                if seconds > 1:
+                if seconds == 1:
                     secondLabel = self.strings["Sekunden"]
                 else:
                     secondLabel = self.strings["Sekunde"]
                 
-                if minutes > 1:
+                if minutes == 1:
                     minuteLabel = self.strings["Minuten"]
                 else:
                     minuteLabel = self.strings["Minute"]

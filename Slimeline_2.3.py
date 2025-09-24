@@ -451,7 +451,7 @@ try:
                 else:
                     minuteLabel = self.strings["Minute"]
 
-                text_parts.append((path[i], "black")) #FIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEENNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+                text_parts.append((path[i], "black"))
                 route_window,
                 title.config(text=(
                     f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} ({minutes} {minuteLabel} und {seconds} {secondLabel})"

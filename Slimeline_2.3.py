@@ -146,7 +146,7 @@ try:
             self.update_clock()
             self.takt = {}
             
-            # Suppose you have a line definition in self.lines[0]
+            
             
 
 

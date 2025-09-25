@@ -141,21 +141,21 @@ try:
             self.master.bind("<Control-r>", lambda start="", stop="":self.open_route_planner_window(start="", stop=""))
             self.master.bind("<Control-k>", self.komplexlinecreation)
             self.master.bind("<Shift-Escape>", self.close_all_except_root)
+            self.master.bind("<Alt-r>", self.clear_all)
             
             self.master.protocol("WM_DELETE_WINDOW", quit)
             self.update_clock()
             self.takt = {}
             
             
-            
-
-
-
-
-        
-
-        
-        
+        def clear_all(self, event=None):
+            self.lines = []
+            self.stations = {}
+            self.bau = {}
+            self.current_line = []
+            self.takt = {}
+            self.line_color = "green"
+            self.canvas.delete("all")
                     
         def update_clock(self):
             jetzt = datetime.now()
@@ -214,6 +214,7 @@ try:
             #self.build_line.configure(bg=f"{uiBG}")
         def exit(self, event=None):
             self.master.destroy()
+            quit()
             
         def set_language(self, language):
             self.width = [self.width, language, self.doEnglish]

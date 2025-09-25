@@ -269,8 +269,8 @@ try:
                 self.changeType.config(text="1-24")
                 self.master.update()
             
-            #with open("linewidth.json", mode="w", encoding="utf-8") as f:
-                #json.dump([self.width, language, self.doEnglish], f)
+            with open("linewidth.json", mode="w", encoding="utf-8") as f:
+                json.dump([self.width, language, self.doEnglish], f)
         def saveOrLoad(self):
             Auswahl = tk.Toplevel(self.master)
             Auswahl.title(self.strings["Auswahl zum Speichern oder Laden"])
@@ -386,7 +386,7 @@ try:
                 route_window,
                 text=(
                     f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} "#hier
-                    f"({minutes} {minuteLabel} und {seconds} {secondLabel})"
+                    
                 ),
                 font=("Arial", 12, "bold")
             )
@@ -398,7 +398,23 @@ try:
                 text=f"{self.strings['Gesamte Wartezeit auf Bahnsteigen']} {wait_min} min {wait_sec} s",
                 font=("Arial", 11, "italic")
             )
+
             wait_label.pack(pady=5)
+            Text = f"{self.strings['Zeit']}: "
+            unitcount = 0
+            for unit in self.uhrzeit:
+                if unit == "AM" or unit == "PM":
+                    Text += f" {str(unit)}"
+                elif unitcount == 0:
+                    Text += str(unit)
+                    unitcount += 1
+                else:
+                    Text += f":{unit}"
+                    unitcount += 1
+            time_label = tk.Label(route_window,
+                                  text=Text,
+                                  font=("Arial", 11, "italic"))
+            time_label.pack(pady=5)
 
             route_window.bind("<Shift-Escape>", self.close_all_except_root)
 
@@ -442,19 +458,20 @@ try:
                 minutes = insgesamt_time // 60
 
                 if seconds == 1:
-                    secondLabel = self.strings["Sekunden"]
-                else:
                     secondLabel = self.strings["Sekunde"]
+                else:
+                    secondLabel = self.strings["Sekunden"]
                 
                 if minutes == 1:
-                    minuteLabel = self.strings["Minuten"]
-                else:
                     minuteLabel = self.strings["Minute"]
+                else:
+                    minuteLabel = self.strings["Minuten"]
 
                 text_parts.append((path[i], "black"))
                 route_window,
                 title.config(text=(
-                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} ({minutes} {minuteLabel} und {seconds} {secondLabel})"
+                    f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station}"
+                    f"({minutes} {minuteLabel} {seconds} {secondLabel})"
                 ),
                 font=("Arial", 12, "bold")
                 )

@@ -10,7 +10,7 @@ import requests
 
 class Netzplaner:
     def __init__(self, master):
-        image_url = "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/c/cc/Schleim.png/revision/latest/scale-to-width-down/150?cb=20200403150614.png"
+        image_url = "https://github.com/sonstantin/Slimeline/blob/main/Slimeline.png"
         response = requests.get(image_url)
         with open("schleim.png", "wb") as f:
             f.write(response.content)

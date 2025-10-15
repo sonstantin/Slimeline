@@ -5,7 +5,7 @@ from tkinter import colorchooser, simpledialog, messagebox, filedialog
 import json
 from PIL import Image, ImageTk
 import requests
-import sys, os, pyperclip
+import sys, os#, pyperclip
 from datetime import datetime
 
 
@@ -16,17 +16,21 @@ try:
     class Netzplaner:
         def __init__(self, master):
             print("============Slimeline============")
-            image_url = "https://static.wikia.nocookie.net/minecraft_de_gamepedia/images/c/cc/Schleim.png/revision/latest/scale-to-width-down/150?cb=20200403150614.png"
-            response = requests.get(image_url)
-            with open("schleim.png", "wb") as f:
-                f.write(response.content)
+            
+            
             
             
             self.master = master
             self.master.title("Slimeline 2.3")
-            self.image = Image.open("schleim.png")
-            self.image = ImageTk.PhotoImage(self.image)
-            self.master.iconphoto(True, self.image)
+            try:
+                self.image = Image.open("Slimeline.png")
+                self.image = ImageTk.PhotoImage(self.image)
+                self.master.iconphoto(True, self.image)
+            except FileNotFoundError:
+                pass
+
+            
+            
             self.master.bell()
             
             self.canvasBG = "white"
@@ -339,13 +343,29 @@ try:
             end_station   = self.end_entry.get()
 
             if start_station not in self.stations:
-                messagebox.showerror(self.strings["Fehler"],
+                for station in self.stations:
+                    Station = station.split("|")
+                    if start_station in Station:
+                        start_station = station
+                        break
+                    else:
+                        start_station = None
+                if not start_station:
+                    messagebox.showerror(self.strings["Fehler"],
                                     f"Die Startstation '{start_station}' existiert nicht.")
-                return
+                    return
             if end_station not in self.stations:
-                messagebox.showerror(self.strings["Fehler"],
-                                    f"Die Zielstation '{end_station}' existiert nicht.")
-                return
+                for station in self.stations:
+                    Station = station.split("|")
+                    if end_station in Station:
+                        end_station = station
+                        break
+                    else:
+                        end_station = None
+                if not end_station:
+                    messagebox.showerror(self.strings["Fehler"],
+                                    f"Die Startstation '{end_station}' existiert nicht.")
+                    return
 
             (distances, previous_stations,
             previous_lines, segment_times,
@@ -690,13 +710,16 @@ try:
                 if name not in self.stations:
                     if name == "":
                         proceed = messagebox.askyesno(self.strings["Bestätigen"], self.strings["Willst du wirklich eine Station ohne Namen erstellen?"])
+                        #ADD SECON LINE WHEN | SYMBOL
                         if proceed == False:
                             return
                     self.stations[name] = [x, y]
                     self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black", tags=name)
                     print("Station wird erstellt: /name".replace("/name", name))
-                    
-                    self.canvas.create_text(x-15, y, text=name, anchor=tk.E, tags=name)
+                    Name = name.split("|")
+                    self.canvas.create_text(x-15, y-30, text=Name[0], anchor=tk.E, tags=name)
+                    if len(Name) == 2:
+                        self.canvas.create_text(x-15, y-5, text=Name[1], anchor=tk.E, tags=name, font=("Arial", 5))
                     self.canvas.tag_bind(name, "<Button-3>", lambda e, station=name: self.stationWindow(station))
 
 
@@ -757,6 +780,43 @@ try:
             seconds = time[1]
             seconds += 60 * minutes
             return seconds
+        def create_takt(self, name, takt):
+            station_start_time = [0, 0, 0]  # [hour, minute, second]
+
+            for station in self.lines[-1][1]:  # Assuming this is a list of station info
+                station_time = station_start_time.copy()
+                
+                while station_time[0] < 24:
+                    stationname = station[2]  # Assuming station[2] is the station name
+
+                    # Initialize the station entry if not already present
+                    if stationname not in self.takt:
+                        self.takt[stationname] = []
+
+                    # Append the current time entry
+                    self.takt[stationname].append({
+                        name: {
+                            f"{station_time[0]:02d}": {
+                                f"{station_time[1]:02d}": {
+                                    f"{station_time[2]:02d}": True
+                                }
+                            }
+                        }
+                    })
+
+                    # Increment time
+                    station_time[2] += int(takt[0])  # takt[0] is assumed to be in seconds
+
+                    # Roll over seconds to minutes
+                    if station_time[2] >= 60:
+                        station_time[1] += station_time[2] // 60
+                        station_time[2] %= 60
+
+                    # Roll over minutes to hours
+                    if station_time[1] >= 60:
+                        station_time[0] += station_time[1] // 60
+                        station_time[1] %= 60
+
         def create_line(self, event=None):
             if len(self.current_line) == 0:
                 return
@@ -872,7 +932,7 @@ try:
 
                 self.line_color = self.line_color
                 canvas_line = self.canvas.create_line(
-                    [self.stations[pt[2]][:2] for pt in self.current_line],
+                    [self.stations[pt[2]][:2] for pt in self.current_line],#Fehler
                     fill=self.line_color,
                     width=self.width,
                 )
@@ -974,7 +1034,9 @@ try:
                     json.dump(data, f, indent=4, ensure_ascii=False)
                 
                 messagebox.showinfo(self.strings["Gespeichert"], self.strings["Netzplan wurde als '/filename' gespeichert."].replace("/filename", filename))
-                
+
+        
+            
         def load_plan(self, event=None):
             
             filename = filedialog.askopenfilename(title=self.strings["Laden"], defaultextension=".json", filetypes=[("JSON", "*.json")])
@@ -992,7 +1054,10 @@ try:
                     return
 
                 # Notfalls leeren, aber weitermachen
-                
+                for line in self.lines:
+                    name = line[0][0]
+                    takt = line[0][2]
+                    self.create_takt(name=name, takt=takt)
 
                 self.draw_lines()  # Jetzt korrekt nach dem Laden
                 messagebox.showinfo(self.strings["Geladen"], self.strings["Netzplan '/filename' wurde geladen. Stationen: /self.stations"].replace("/filename", filename).replace("/self.stations", f"{self.stations}"))
@@ -1000,13 +1065,18 @@ try:
                     
                 print(self.stations)
                 print(self.lines)
+                print(self.takt)
         def draw_lines(self):
             self.canvas.delete("all")
             for line, points, time, color in self.lines:
                 self.canvas.create_line([self.stations[point[2]][:2] for point in points], fill=color, width=self.width)
                 for x, y, name in points:
                     self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black",)
-                    self.canvas.create_text(x-15, y, text=name, anchor=tk.E, tags=name)
+                    Name = name.split("|")
+                    self.canvas.create_text(x-15, y, text=Name[0], anchor=tk.E, tags=name)
+                    if len(Name) == 2:
+                        self.canvas.create_text(x-15, y+30, text=Name[1], anchor=tk.E, tags=name, font=("Arial", 5))
+
                     self.canvas.tag_bind(name, "<Button-1>", lambda event, name=name: self.open_line_creation_window(name))
 
         def open_line_creation_window(self, name):
@@ -1177,7 +1247,7 @@ try:
 
             name = tk.Label(self.info, text=f'{self.strings["Name:"]} {line[0][0]}')
             color = tk.Label(self.info, text=f'{self.strings["Farbe:"]} {line[-1]}', bg=f"{line[-1]}")
-            taktOfLine = tk.Label(self.info, text=f'{self.strings["Takt:"]} {line[0][2][0]}')
+            taktOfLine = tk.Label(self.info, text=f'{self.strings["Takt:"]} {line[0][2]}')
             
             name.pack()
             color.pack()
@@ -1416,8 +1486,8 @@ except Exception as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
-    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    #pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. We copied the link in your clipboard. If you press 'OK', we will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    pyperclip.copy(str(e))
+    #pyperclip.copy(str(e))
     
 #Here was the place, I went stupid and copied Slimeline again!

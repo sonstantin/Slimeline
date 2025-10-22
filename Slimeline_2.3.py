@@ -3,9 +3,9 @@
 import tkinter as tk
 from tkinter import colorchooser, simpledialog, messagebox, filedialog
 import json
-from PIL import Image, ImageTk
+from PIL import Image
 import requests
-import sys, os#, pyperclip
+import sys, os, pyperclip
 from datetime import datetime
 
 
@@ -22,15 +22,21 @@ try:
             
             self.master = master
             self.master.title("Slimeline 2.3")
-            try:
-                self.image = Image.open("Slimeline.png")
-                self.image = ImageTk.PhotoImage(self.image)
-                self.master.iconphoto(True, self.image)
-            except FileNotFoundError:
-                pass
 
-            
-            
+            if not os.path.exists("Slimeline.png"):
+                image_url = "https://raw.githubusercontent.com/sonstantin/Slimeline/refs/heads/main/Slimeline.png"
+                response = requests.get(image_url)
+                with open("Slimeline.png", "wb") as f:
+                    f.write(response.content)
+
+            try:
+               
+               self.image = tk.PhotoImage(file="Slimeline.png")
+            except tk.TclError:
+               
+                self.image = tk.PhotoImage(width=1, height=1)
+
+            self.master.iconphoto(True, self.image)
             self.master.bell()
             
             self.canvasBG = "white"

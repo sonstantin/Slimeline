@@ -1,7 +1,7 @@
 # Slimeline
 Ein Netzplaner, bei dem man eigene Netzwerke aufbauen kann.
 
-Version: 2.2
+Version: 2.3
 
 *Features:*
 

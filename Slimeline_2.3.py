@@ -18,10 +18,13 @@ try:
             print("============Slimeline============")
             
             
+            self.dirname = os.path.dirname(__file__)
             
+            print(self.dirname)
             
             self.master = master
             self.master.title("Slimeline 2.3")
+
 
             if not os.path.exists("Slimeline.png"):
                 image_url = "https://raw.githubusercontent.com/sonstantin/Slimeline/refs/heads/main/Slimeline.png"
@@ -51,7 +54,7 @@ try:
 
             self.bau = {}
             try:
-                with open("Linewidth.json", mode="r", encoding="utf-8") as f:
+                with open(f"{self.dirname}/Linewidth.json", mode="r", encoding="utf-8") as f:
                     self.width = json.load(f)
                     language = self.width[1]
                     self.doEnglish = self.width[2]
@@ -63,10 +66,10 @@ try:
             except TypeError:
                 self.width = 7
                 language = "Englisch"
-                with open("linewidth.json", mode="w", encoding="utf-8") as f:
+                with open(f"{self.dirname}/linewidth.json", mode="w", encoding="utf-8") as f:
                     json.dump(f)
             
-            with open(f"slimeline_text_{language}.json", mode="r", encoding="utf-8") as f:
+            with open(f"{self.dirname}/slimeline_text_{language}.json", mode="r", encoding="utf-8") as f:
                 self.strings = json.load(f)
                 print(self.strings)
             print(self.strings["Slimeline wird geladen"])
@@ -152,6 +155,7 @@ try:
             self.master.bind("<Control-k>", self.komplexlinecreation)
             self.master.bind("<Shift-Escape>", self.close_all_except_root)
             self.master.bind("<Alt-r>", self.clear_all)
+            self.master.bind("<Control-O>", self.options)
             
             self.master.protocol("WM_DELETE_WINDOW", quit)
             self.update_clock()
@@ -213,7 +217,7 @@ try:
                     self.width = width
                     self.redraw()
                     self.draw_lines()
-                    with open("Linewidth.json", mode="w", encoding="utf-8") as f:
+                    with open(f"{self.dirname}/Linewidth.json", mode="w", encoding="utf-8") as f:
                         json.dump(self.width, f)
             
             
@@ -228,7 +232,7 @@ try:
             
         def set_language(self, language):
             self.width = [self.width, language, self.doEnglish]
-            with open("Linewidth.json", mode="w", encoding="utf-8") as f:
+            with open(f"{self.dirname}/Linewidth.json", mode="w", encoding="utf-8") as f:
                 json.dump(self.width, f)
             python = sys.executable
             os.execl(python, python, *sys.argv)
@@ -280,7 +284,7 @@ try:
                 self.changeType.config(text="1-24")
                 self.master.update()
             
-            with open("linewidth.json", mode="w", encoding="utf-8") as f:
+            with open(f"{self.dirname}/linewidth.json", mode="w", encoding="utf-8") as f:
                 json.dump([self.width, language, self.doEnglish], f)
         def saveOrLoad(self):
             Auswahl = tk.Toplevel(self.master)

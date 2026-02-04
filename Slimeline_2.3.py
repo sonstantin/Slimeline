@@ -1500,4 +1500,4 @@ except Exception as e:
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. We copied the link in your clipboard. If you press 'OK', we will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
     #pyperclip.copy(str(e))
     
-#Here was the place, I went stupid and copied Slimeline again!
+

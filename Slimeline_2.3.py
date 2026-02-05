@@ -16,12 +16,12 @@ try:
     class Netzplaner:
         def __init__(self, master):
             print("============Slimeline============")
-            
-            
+
+
             self.dirname = os.path.dirname(__file__)
-            
+
             print(self.dirname)
-            
+
             self.master = master
             self.master.title("Slimeline 2.3")
 
@@ -33,21 +33,21 @@ try:
                     f.write(response.content)
 
             try:
-               
+
                self.image = tk.PhotoImage(file="Slimeline.png")
             except tk.TclError:
-               
+
                 self.image = tk.PhotoImage(width=1, height=1)
 
             self.master.iconphoto(True, self.image)
             self.master.bell()
-            
+
             self.canvasBG = "white"
             self.RouteFinder = False
-            
+
             self.canvas = tk.Canvas(self.master, bg=self.canvasBG, width=600, height=400)
             self.canvas.pack(expand=True, fill=tk.BOTH)
-            
+
             self.build_line = tk.Frame(self.master, relief="solid", borderwidth=5)
             self.build_line.pack(fill = tk.X)
             self.station_radius = 10
@@ -68,7 +68,7 @@ try:
                 language = "Englisch"
                 with open(f"{self.dirname}/linewidth.json", mode="w", encoding="utf-8") as f:
                     json.dump(f)
-            
+
             with open(f"{self.dirname}/slimeline_text_{language}.json", mode="r", encoding="utf-8") as f:
                 self.strings = json.load(f)
                 print(self.strings)
@@ -87,8 +87,8 @@ try:
             self.canvas.bind("<Button-1>", lambda event: self.add_station(event, komplex=False))
             jetzt = datetime.now()
             self.uhrzeit = jetzt.strftime("%H : %M")  # Nur die Uhrzeit
-            
-            
+
+
             timeframe = tk.Frame(self.master, relief="solid", borderwidth=4)
             timeframe.place(x=0, y=0)
             self.time_Label = tk.Label(timeframe, text=self.uhrzeit, bg="white")
@@ -103,19 +103,19 @@ try:
             # NEU: Separate Buttons für Speichern und Laden
             self.save_button = tk.Button(self.master, text=self.strings["Speichern/Laden"], command=self.saveOrLoad)
             self.save_button.pack()
-            
-            
+
+
             self.build_mode_button = tk.Button(self.master, text=self.strings["Bau-Modus deaktivieren"], command=self.toggle_build_mode)
             self.build_mode_button.pack()
-            
+
             options = tk.Button(self.master, text=self.strings["Optionen"], command=lambda language=language: self.options(language=language))
             options.pack(anchor="w")
 
             self.line_color = "green"
-            
+
             self.arrow = tk.Frame(self.master, relief="solid", borderwidth=5)
             self.arrow.pack(side=tk.RIGHT)
-            
+
             self.up_button = tk.Button(self.arrow, text="↑", command=lambda: self.move_canvas(0, -1))
             self.up_button.pack(side=tk.RIGHT)
             self.down_button = tk.Button(self.arrow, text="↓", command=lambda: self.move_canvas(0, 1))
@@ -124,7 +124,7 @@ try:
             self.left_button.pack(side=tk.RIGHT)
             self.right_button = tk.Button(self.arrow, text="→", command=lambda: self.move_canvas(1, 0))
             self.right_button.pack(side=tk.RIGHT)
-            
+
             self.WASD = False
 
             self.routebutton = tk.Button(self.master, text=self.strings["Routenplaner öffnen"], command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
@@ -140,7 +140,7 @@ try:
                 self.master.bind("<A>", lambda event: self.move_canvas(-1, 0))
                 self.master.bind("<S>", lambda event: self.move_canvas(0, 1))
                 self.master.bind("<D>", lambda event: self.move_canvas(1, 0))
-            
+
             print(self.strings["Das inizialisieren von Slimeline war erfolgreich!"])
             self.master.bind("<Escape>", self.exit)
             self.master.bind("<Control-s>", self.save_plan)
@@ -156,12 +156,12 @@ try:
             self.master.bind("<Shift-Escape>", self.close_all_except_root)
             self.master.bind("<Alt-r>", self.clear_all)
             self.master.bind("<Control-O>", self.options)
-            
+
             self.master.protocol("WM_DELETE_WINDOW", quit)
             self.update_clock()
             self.takt = {}
-            
-            
+
+
         def clear_all(self, event=None):
             self.lines = []
             self.stations = {}
@@ -170,7 +170,7 @@ try:
             self.takt = {}
             self.line_color = "green"
             self.canvas.delete("all")
-                    
+
         def update_clock(self):
             jetzt = datetime.now()
             hour = jetzt.hour
@@ -194,13 +194,13 @@ try:
                     widget.destroy()
         def setOptions(self, canvasBG, uiBG, width):
             if canvasBG == "":
-            
+
                 canvasBG = colorchooser.askcolor(title=self.strings["Hintergrundfarbe wählen"])
                 if uiBG[1]:
-                    
+
                     self.canvas.configure(bg=f"{canvasBG[1]}")
                     self.canvas.configure(bg=f"{canvasBG[1]}")
-                
+
             elif uiBG == "":
                 uiBG = colorchooser.askcolor(title=self.strings["Hintergrundfarbe wählen"])
                 if uiBG[1]:
@@ -210,56 +210,56 @@ try:
                 if uiBG == "black":
                             self.left_button.config(bg="black", fg="white")
             elif width == "":
-                
+
                 width = int(simpledialog.askinteger("Breite", self.strings["Wie breit sollen deine Linien sein? Die Aktuelle Breite beträgt"].replace("self.width", f"{self.width}")))
                 if width is not None:
-                
+
                     self.width = width
                     self.redraw()
                     self.draw_lines()
                     with open(f"{self.dirname}/Linewidth.json", mode="w", encoding="utf-8") as f:
                         json.dump(self.width, f)
-            
-            
+
+
             self.master.update()
-        
-            
-            
+
+
+
             #self.build_line.configure(bg=f"{uiBG}")
         def exit(self, event=None):
             self.master.destroy()
             quit()
-            
+
         def set_language(self, language):
             self.width = [self.width, language, self.doEnglish]
             with open(f"{self.dirname}/Linewidth.json", mode="w", encoding="utf-8") as f:
                 json.dump(self.width, f)
             python = sys.executable
             os.execl(python, python, *sys.argv)
-        
+
 
         def options(self, language):
             settings = tk.Toplevel(self.master)
             settings.bind("<Shift-Escape>", self.close_all_except_root)
-            
+
             settings.title(self.strings["Einstellungen"])
             graphical = tk.LabelFrame(settings, text=self.strings["Graphische Einstellungen"], relief="solid", borderwidth=5)
             graphical.grid(row=0, column=0)
             canvasbgEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="bla", canvasBG="", width="bla": self.setOptions(uiBG="bla", canvasBG="", width="bla"))
             canvasbgEntry.grid(row=0, column=1)
             canvasbgLabel = tk.Label(graphical, text=self.strings["Hintergrund des Plans bestimmen:"])
-            
-            
+
+
             canvasbgLabel.grid(row=0, column=0)
-            
+
             uiLabel = tk.Label(graphical, text=self.strings["Hintergrundfarbe wählen"])
             uiLabel.grid(row=1, column=0)
             uiEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda uiBG="", canvasBG="bla", width="bla": self.setOptions(uiBG="", canvasBG="bla", width="bla"))
             uiEntry.grid(row=1, column=1)
-            
+
             widthLabel = tk.Label(graphical, text=self.strings["Breite der Linien bestimmen:"])
             widthLabel.grid(row=2, column=0)
-            
+
             widthEntry = tk.Button(graphical, text=self.strings["Bestimmen"], command=lambda canvasBG="bla", uiBG="bla", width="": self.setOptions(canvasBG="bla", uiBG="bla", width=""))
             widthEntry.grid(row=2, column=1)
 
@@ -273,7 +273,7 @@ try:
             temporal.grid(row=2, column=0)
             self.changeType = tk.Button(temporal, text="1-24", command=lambda language=language: self.toggle_clock(language=language))
             self.changeType.pack()
-            
+
         def toggle_clock(self, language):
             if self.doEnglish == False:
                 self.doEnglish = True
@@ -283,7 +283,7 @@ try:
                 self.doEnglish = False
                 self.changeType.config(text="1-24")
                 self.master.update()
-            
+
             with open(f"{self.dirname}/linewidth.json", mode="w", encoding="utf-8") as f:
                 json.dump([self.width, language, self.doEnglish], f)
         def saveOrLoad(self):
@@ -294,7 +294,7 @@ try:
             LoadButton = tk.Button(Auswahl, text=self.strings["Laden"], command=self.load_plan)
             LoadButton.pack()
             Auswahl.bind("<Shift-Escape>", self.close_all_except_root)
-            
+
         def open_route_planner_window(self, start, stop, event=None):
             window = tk.Toplevel(self.master)
             window.title(self.strings["Routenplaner"])
@@ -313,7 +313,7 @@ try:
 
             calculate_button = tk.Button(window, text=self.strings["Route berechnen"], command=self.calculate_route)
             calculate_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
-            
+
         def lists(self):
             ask = tk.Toplevel(self.master)
             ask.title(self.strings["Listen"])
@@ -325,7 +325,7 @@ try:
 
 
         def calculate_wait_time(self, current_time, takt_in_seconds):
-            
+
             if not isinstance(takt_in_seconds, int) or takt_in_seconds == 0:
                 return 0  # Kein Takt vorhanden
 
@@ -417,7 +417,7 @@ try:
                 route_window,
                 text=(
                     f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station} "#hier
-                    
+
                 ),
                 font=("Arial", 12, "bold")
             )
@@ -492,7 +492,7 @@ try:
                     secondLabel = self.strings["Sekunde"]
                 else:
                     secondLabel = self.strings["Sekunden"]
-                
+
                 if minutes == 1:
                     minuteLabel = self.strings["Minute"]
                 else:
@@ -516,7 +516,7 @@ try:
 
 
 
-                
+
 
         def dijkstra(self, start_station):
             # helper: convert takt stored in various shapes into plain seconds (int)
@@ -701,7 +701,7 @@ try:
             if self.x and self.y:
                 self.add_station(komplex=True)
         def add_station(self, event=None, komplex=False):
-            
+
             if self.build_mode:
                 if komplex == False:
                     x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
@@ -775,7 +775,7 @@ try:
             # Entferne den Eintrag aus der Listbox
             self.listbox.delete(index)
 
-            
+
 
 
         def add_intermediate_stop_prompt(self, event=None):
@@ -795,7 +795,7 @@ try:
 
             for station in self.lines[-1][1]:  # Assuming this is a list of station info
                 station_time = station_start_time.copy()
-                
+
                 while station_time[0] < 24:
                     stationname = station[2]  # Assuming station[2] is the station name
 
@@ -876,7 +876,7 @@ try:
                                 text = self.strings[
                                 "Zeit zwischen /new_points[j][2] und /new_points[j+1][2] (in Sekunden):"
                                 ]
-                                
+
 
                                 # Platzhalter ersetzen (beide müssen Strings sein)
                                 text = text.replace("/new_points[j][2]", str(new_points[j][2]))
@@ -935,8 +935,8 @@ try:
                     if t is None:
                         return
                     times.append(t)
-                
-                        
+
+
 
 
 
@@ -966,7 +966,7 @@ try:
                         #minute += int(takt[0])
                     #except IndexError:
                         #pass
-                
+
                     #if minute >= 60:
                         #hour += minute // 60
                         #minute %= 60
@@ -988,7 +988,7 @@ try:
 
             for station in self.lines[-1][1]:  # Assuming this is a list of station info
                 station_time = station_start_time.copy()
-                
+
                 while station_time[0] < 24:
                     stationname = station[2]  # Assuming station[2] is the station name
 
@@ -1038,17 +1038,18 @@ try:
                 data = {
                     "lines": self.lines,
                     "stations": self.stations,
-                    "build": self.bau
+                    "build": self.bau,
+                    "takt": self.takt
                 }
                 with open(filename, mode="w", encoding="utf-8") as f:
                     json.dump(data, f, indent=4, ensure_ascii=False)
-                
+
                 messagebox.showinfo(self.strings["Gespeichert"], self.strings["Netzplan wurde als '/filename' gespeichert."].replace("/filename", filename))
 
-        
-            
+
+
         def load_plan(self, event=None):
-            
+
             filename = filedialog.askopenfilename(title=self.strings["Laden"], defaultextension=".json", filetypes=[("JSON", "*.json")])
             if filename:
                 if not filename.endswith(".json"):
@@ -1059,6 +1060,7 @@ try:
                         self.lines = data["lines"]
                         self.stations = data["stations"]
                         self.bau = data["build"]
+                        self.takt = data["takt"]
                 except FileNotFoundError:
                     messagebox.showerror(self.strings["Fehler"], self.strings["Datei '/filename' wurde nicht gefunden."].replace("/filename", filename))
                     return
@@ -1072,7 +1074,7 @@ try:
                 self.draw_lines()  # Jetzt korrekt nach dem Laden
                 messagebox.showinfo(self.strings["Geladen"], self.strings["Netzplan '/filename' wurde geladen. Stationen: /self.stations"].replace("/filename", filename).replace("/self.stations", f"{self.stations}"))
 
-                    
+
                 print(self.stations)
                 print(self.lines)
                 print(self.takt)
@@ -1117,10 +1119,10 @@ try:
             searchButton.grid(row=0, column=1)
             varRow = 1
             varColumn = 0
-            
+
             #myScrollbar = tk.Scrollbar(list, orient="vertical")
             #myScrollbar.grid(row=1, column=4)
-            
+
             stops = sorted(self.stations)
             count = 0
             for stop in stops:
@@ -1135,7 +1137,7 @@ try:
                         varRow = 1
                     count += 1
             self.list.title(self.strings["Liste aller Stationen (insgesamt /count)"].replace("/count", str(count)))
-            
+
             #34 
         def rename(self,station):
             renameW = tk.Toplevel(self.master)
@@ -1143,11 +1145,11 @@ try:
             renameW.bind("<Shift-Escape>", self.close_all_except_root)
             ueberschrift = tk.Label(renameW, text=self.strings["Wie soll /station in Zukunft heissen"].replace("/station", station))
             ueberschrift.pack()
-            
+
             newNameEntry = tk.Entry(renameW, width=50)
             newNameEntry.pack()
             newNameEntry.insert(0, f"{station}")
-            
+
             confirm = tk.Button(renameW, text=self.strings["Bestätigen"], command=lambda: self.Dorename(station=station, new=newNameEntry.get()))
 
 
@@ -1196,7 +1198,7 @@ try:
                     window.destroy()
                     messagebox.showinfo(self.strings["Gelöscht"], self.strings["Die Linie '/line[0][0]' wurde gelöscht."].replace("/line[0][0]", line[0][0]))
 
-        
+
         def delete_station(self, station):
             # 1. Aus stations-Dict entfernen
             if station in self.stations:
@@ -1214,11 +1216,11 @@ try:
         def stopRouteFinding(self, stop_station):
             self.RouteFinder = False
             self.open_route_planner_window(start=self.start_station, stop=stop_station)
-            
+
         def startRouteFinding(self, start_station):
             self.RouteFinder = True
             self.start_station = start_station 
-            
+
         def changeName(self, line):
             self.lines.remove(line)
             new = simpledialog.askstring(self.strings["Neuer Name"], self.strings["Was soll der neue Name der Linie /line[0][0] sein?"].replace("/line[0][0]", line[0][0]))
@@ -1244,21 +1246,21 @@ try:
                 color = Line[-1]
 
                 newline = [other_stuff, stations, newList, color]
-                
+
                 self.lines.append(newline)
         def lineinfo(self, line, station):
-            
+
             self.highlight_single_line(line)
 
             self.info = tk.Toplevel(self.master)
             count = 0
-            
+
 
 
             name = tk.Label(self.info, text=f'{self.strings["Name:"]} {line[0][0]}')
             color = tk.Label(self.info, text=f'{self.strings["Farbe:"]} {line[-1]}', bg=f"{line[-1]}")
             taktOfLine = tk.Label(self.info, text=f'{self.strings["Takt:"]} {line[0][2]}')
-            
+
             name.pack()
             color.pack()
             taktOfLine.pack()
@@ -1303,7 +1305,7 @@ try:
                 if str(stop).strip() == str(station).strip() and station is not None:
                     show = tk.Button(overStations, text=f"{thing}", bg="red", command=lambda Line=line, number=count-1: self.changeTime(Line, number))
                     counter += 1
-                
+
 
 
                 else:
@@ -1322,18 +1324,18 @@ try:
             self.restore_all_lines()
             self.info.destroy()
 
-            
+
 
 
         def stationWindow(self, station, event=None):
                     #self.bau ist ein dictionary welches die Bauprojekte zeigt
-                    
+
                     stationW = tk.Toplevel(self.master)
                     stationW.bind("<Shift-Escape>", self.close_all_except_root)
                     # self.lines: [(Name, identification_number[(koor, dina, ten, "name1"), (koor, dina, ten, "name2")], "color")]
                     name = tk.Label(stationW, text=f'{self.strings["Name:"]} {station}')
                     name.pack()
-                    
+
                     coords = tk.Label(stationW, text=f'{self.strings["Koordinaten:"]} {self.stations[station][0]}, {self.stations[station][1]}')
                     coords.pack()
                     Ueber = tk.Label(stationW, text=self.strings["vorbeikommende Linien:"])
@@ -1392,7 +1394,7 @@ try:
                                                             (hour == current_h and minute == current_m and second > current_s)
                                                         ):
                                                             departure_time = f"{hour:02d}:{minute:02d}:{second:02d}"
-                                                            
+
                                                             departure.append(departure_time)
                                                             next_one = departure_time
                                                             break
@@ -1432,7 +1434,7 @@ try:
                                 showTheWork.pack()
                             except KeyError:
                                 self.bau.uprade({station: []})
-                    
+
                     addBuildLabel = tk.Label(stationW, text=self.strings["Bauprojekt hinzufügen"], bg="yellow")
                     addBuildLabel.pack()
                     self.addBuild = tk.Entry(stationW, width=30)
@@ -1482,13 +1484,13 @@ try:
         def restore_all_lines(self):
             self.draw_lines()
 
-        
+
 
 
     if __name__ == "__main__":
         root = tk.Tk()
         netzplaner = Netzplaner(root)
-        
+
         netzplaner.run()
 
 except Exception as e:
@@ -1496,8 +1498,6 @@ except Exception as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
-    #pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. We copied the link in your clipboard. If you press 'OK', we will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    #pyperclip.copy(str(e))
-    
-
+    pyperclip.copy(str(e))

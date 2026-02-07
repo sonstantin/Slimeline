@@ -16,14 +16,14 @@ try:
     class Netzplaner:
         def __init__(self, master):
             print("============Slimeline============")
-
+            self.version = 2.3
 
             self.dirname = os.path.dirname(__file__)
 
             print(self.dirname)
 
             self.master = master
-            self.master.title("Slimeline 2.3")
+            self.master.title(f"Slimeline {self.version}")
 
 
             if not os.path.exists("Slimeline.png"):
@@ -998,13 +998,10 @@ try:
 
                     # Append the current time entry
                     self.takt[stationname].append({
-                        name: {
-                            f"{station_time[0]:02d}": {
-                                f"{station_time[1]:02d}": {
-                                    f"{station_time[2]:02d}": True
-                                }
-                            }
-                        }
+                        
+                            f"{station_time}": f"{name}"
+                            
+                        
                     })
 
                     # Increment time
@@ -1477,9 +1474,11 @@ try:
                     draw_color = "#ededed"
                 coords = [(x, y) for x, y, _ in points]
                 self.canvas.create_line(coords, fill=draw_color, width=self.width)
+                
                 for x, y, name in points:
                     self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="black")
                     self.canvas.create_text(x - 15, y, text=name, anchor=tk.E, tags=name)
+          
 
         def restore_all_lines(self):
             self.draw_lines()
@@ -1499,5 +1498,7 @@ except Exception as e:
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
     pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
-    messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. We copied the link in your clipboard. If you press 'OK', we will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    pyperclip.copy(str(e))
+    messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. \nWe copied the link in your clipboard. If you press 'OK', \nwe will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
+    pyperclip.copy(f"""Version {self.version}
+    Datum: {datetime.date}
+    Fehler: {e}""")

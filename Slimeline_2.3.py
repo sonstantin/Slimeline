@@ -5,7 +5,7 @@ from tkinter import colorchooser, simpledialog, messagebox, filedialog
 import json
 from PIL import Image
 import requests
-import sys, os, pyperclip
+import sys, os#, pyperclip
 from datetime import datetime
 
 
@@ -1256,7 +1256,7 @@ try:
 
             name = tk.Label(self.info, text=f'{self.strings["Name:"]} {line[0][0]}')
             color = tk.Label(self.info, text=f'{self.strings["Farbe:"]} {line[-1]}', bg=f"{line[-1]}")
-            taktOfLine = tk.Label(self.info, text=f'{self.strings["Takt:"]} {line[0][2]}')
+            taktOfLine = tk.Label(self.info, text=f'{self.strings["Takt:"]} {line[0][2][0]}')
 
             name.pack()
             color.pack()
@@ -1313,7 +1313,7 @@ try:
                 counter += 1
 
 
-            self.info.title(self.strings["Information zur /line[0][0] (/count Station(en))"].replace("/line[0][0]", line[0][0]).replace("/count", f"{count}"))
+            self.info.title(self.strings["Information zur /line[0][0] (/count Station(en))"].replace("/line[0][0]", line[0][0]).replace("/count", f"{counter//2}"))
             self.info.protocol("WM_DELETE_WINDOW", self.on_close)
 
             # Rückkehr zur normalen Darstellung, wenn Fenster geschlossen wird
@@ -1497,8 +1497,8 @@ except Exception as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
-    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    #pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. \nWe copied the link in your clipboard. If you press 'OK', \nwe will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    pyperclip.copy(f"""Version {self.version}
-    Datum: {datetime.date}
-    Fehler: {e}""")
+    #pyperclip.copy(f"""Version {self.version}
+    #Datum: {datetime.date}
+    #Fehler: {e}""")

@@ -998,10 +998,10 @@ try:
 
                     # Append the current time entry
                     self.takt[stationname].append({
-                        
+
                             f"{station_time}": f"{name}"
-                            
-                        
+
+
                     })
 
                     # Increment time
@@ -1245,6 +1245,7 @@ try:
                 newline = [other_stuff, stations, newList, color]
 
                 self.lines.append(newline)
+        
         def lineinfo(self, line, station):
 
             self.highlight_single_line(line)
@@ -1277,6 +1278,8 @@ try:
             recolor_button.pack()
             rename_button = tk.Button(self.info, text=self.strings["Namen ändern"], command=lambda line=line: self.changeName(line=line))
             rename_button.pack()
+            changetimesB = tk.Button(self.info, text=self.strings["Ankunftszeit ändern"])
+            changetimesB.pack()
 
 
             counter = 0
@@ -1322,6 +1325,27 @@ try:
             self.info.destroy()
 
 
+        def get_next_departure(self, station, linename):
+            if station not in self.takt:
+                return None
+
+            current_h, current_m, current_s = map(int, self.uhrzeit)
+
+            for entry in self.takt[station]:
+                for time_str, line in entry.items():
+                    if line != linename:
+                        continue
+
+                    h, m, s = map(int, time_str.strip("[]").split(","))
+
+                    if (
+                        h > current_h or
+                        (h == current_h and m > current_m) or
+                        (h == current_h and m == current_m and s >= current_s)
+                    ):
+                        return f"{h:02d}:{m:02d}:{s:02d}"
+
+            return None  # heute nichts mehr
 
 
         def stationWindow(self, station, event=None):
@@ -1339,76 +1363,36 @@ try:
                     Ueber.pack()
 
                     for line in self.lines:
-                        linename = line[0][0]   # e.g., "S1"
-                        stations_fwd = line[1]  # Original direction
-                        color = line[-1]        # e.g., "red"
+                        linename = line[0][0]   # HIER wird linename definiert
+                        stations_fwd = line[1]
+                        color = line[-1]
 
-                        directions = {
-                            "forward": stations_fwd,
-                            "reverse": stations_fwd[::-1]
-                        }
+                        for stations in (stations_fwd, stations_fwd[::-1]):
+                           for i, linestation in enumerate(stations):
+                                if linestation[2] == station:
 
-                        for dir_name, stations in directions.items():
+                                    next_station = (
+                                    stations[i + 1][2]
+                                    if i + 1 < len(stations)
+                                    else self.strings["Endstation"]
+                                    )
 
-                            for i, linestation in enumerate(stations):
-                                if linestation[2] == station:  # This is the current station
-                                    # Determine the next station in this direction
-                                    if i + 1 < len(stations):
-                                        next_station = stations[i + 1][2]  # Name of next station
+                                    #  HIER aufrufen – nicht außerhalb!
+                                    next_dep = self.get_next_departure(station, linename)
+
+                                    if next_dep:
+                                        text = f"{linename}, {self.strings['nächste Abfahrt:']} {next_dep} → {next_station}"
                                     else:
-                                        next_station = self.strings["Endstation"]
+                                        text = f"{linename}, {self.strings['keine weiteren Abfahrten']} → {next_station}"
 
-                                    next_one = None
-                                    departure = []
+                                    tk.Button(
+                                    stationW,
+                                    text=text,
+                                    bg=color,
+                                    command=lambda line=line, station=station: self.lineinfo(line=line, station=station)
+                                    ).pack()
 
-                                    for entry in self.takt[station][2:]:  # Skip metadata
-                                        if linename in entry:
-                                            time_data = entry[linename]  # e.g., {"14": {"53": {"10": True}}}
 
-                                            for hour_str in sorted(time_data.keys(), key=int):
-                                                hour = int(hour_str)
-                                                if hour < int(self.uhrzeit[0]):
-                                                    continue
-
-                                                minutes_dict = time_data[hour_str]
-                                                for minute_str in sorted(minutes_dict.keys(), key=int):
-                                                    minute = int(minute_str)
-
-                                                    if hour == int(self.uhrzeit[0]) and minute < int(self.uhrzeit[1]):
-                                                        continue
-
-                                                    second_dict = minutes_dict[minute_str]
-                                                    for second_str in sorted(second_dict.keys(), key=int):
-                                                        second = int(second_str)
-
-                                                        current_h = int(self.uhrzeit[0])
-                                                        current_m = int(self.uhrzeit[1])
-                                                        current_s = int(self.uhrzeit[2])
-
-                                                        if (
-                                                            hour > current_h or
-                                                            (hour == current_h and minute > current_m) or
-                                                            (hour == current_h and minute == current_m and second > current_s)
-                                                        ):
-                                                            departure_time = f"{hour:02d}:{minute:02d}:{second:02d}"
-
-                                                            departure.append(departure_time)
-                                                            next_one = departure_time
-                                                            break
-                                                    if next_one:
-                                                        break
-                                                if next_one:
-                                                    break
-
-                                    if next_one:
-                                        inter = tk.Button(
-                                            stationW,
-                                            text=f"{linename}, {self.strings['nächste Abfahrt:']} {departure[0]} {next_station}",
-                                            bg=color,
-                                            command=lambda line=line, station=station: self.lineinfo(line=line, station=station)
-                                        )
-                                        inter.pack()
-                                        departure = []
 
 
                     renameButton = tk.Button(stationW, text=self.strings["/station umbenennen"].replace("/station", station), command=lambda station=station: self.rename(station=station))
@@ -1474,11 +1458,11 @@ try:
                     draw_color = "#ededed"
                 coords = [(x, y) for x, y, _ in points]
                 self.canvas.create_line(coords, fill=draw_color, width=self.width)
-                
+
                 for x, y, name in points:
                     self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="black")
                     self.canvas.create_text(x - 15, y, text=name, anchor=tk.E, tags=name)
-          
+
 
         def restore_all_lines(self):
             self.draw_lines()

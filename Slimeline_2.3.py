@@ -5,7 +5,7 @@ from tkinter import colorchooser, simpledialog, messagebox, filedialog
 import json
 from PIL import Image
 import requests
-import sys, os#, pyperclip
+import sys, os, pyperclip
 from datetime import datetime
 
 
@@ -1481,8 +1481,8 @@ except Exception as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
-    #pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. \nWe copied the link in your clipboard. If you press 'OK', \nwe will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    #pyperclip.copy(f"""Version {self.version}
-    #Datum: {datetime.date}
-    #Fehler: {e}""")
+    pyperclip.copy(f"""Version {self.version}
+    Datum: {datetime.date}
+    Fehler: {e}""")

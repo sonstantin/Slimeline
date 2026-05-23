@@ -464,4 +464,27 @@ class Netzplaner:
                 self.addBuild.pack()
                 addBuildButton = tk.Button(stationW, text="Bauarbeit hinzufügen", command=lambda station=station: self.addWIP(station=station))
                 addBuildButton.pack()
-                ripBuildButton = tk.Button(stationW, text="Bauprojekt beenden", command=lambda station=stati
+                ripBuildButton = tk.Button(stationW, text="Bauprojekt beenden", command=lambda station=station: self.ripWIP(station=station))
+                ripBuildButton.pack()
+
+    def addWIP(self, station):
+        newWIP = self.addBuild.get()
+        if station in self.bau:
+            self.bau[station].append(newWIP)
+        else:
+            self.bau.update({station: [newWIP]})
+    def ripWIP(self, station):
+              rip = simpledialog.askstring("Bauarbeiten beenden", "Welches Bauprojekt möchtest du beenden?")
+              if rip in self.bau[station]:
+                  self.bau[station].remove(rip)
+              else:
+                  messagebox.showerror("Fehler", f"Es gibt die Bauarbeit oder das Bauprojekt {rip} nicht!")
+
+    def run(self):
+        self.draw_lines()
+        self.master.mainloop()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    netzplaner = Netzplaner(root)
+    netzplaner.run()

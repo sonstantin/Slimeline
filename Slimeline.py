@@ -1,28 +1,28 @@
 import tkinter as tk
 from tkinter import colorchooser, simpledialog, messagebox
-import pickle
+import json
 
 
 class Netzplaner:
     def __init__(self, master):
-        
+
         print("Slimeline wird geladen")
         self.master = master
         self.master.title("Slimeline 1.1")
         self.master.bell()
-        
+
         self.canvasBG = "white"
         self.RouteFinder = False
-        
+
         self.canvas = tk.Canvas(self.master, bg=self.canvasBG, width=600, height=400)
         self.canvas.pack(expand=True, fill=tk.BOTH)
-        
+
         self.build_line = tk.Frame(self.master, relief="solid",borderwidth=5)
         self.build_line.pack(fill = tk.X)
         self.station_radius = 10
 
         self.bau = {}
-        
+
 
 
         self.add_intermediate_stop_button = tk.Button(self.build_line, text="Umsteigemöglichkeit hinzufügen", command=self.add_intermediate_stop_prompt)
@@ -47,16 +47,16 @@ class Netzplaner:
         # NEU: Separate Buttons für Speichern und Laden
         self.save_button = tk.Button(self.master, text="Speichern/Laden", command=self.saveOrLoad)
         self.save_button.pack()
-        
+
 
         self.build_mode_button = tk.Button(self.master, text="Bau-Modus deaktivieren", command=self.toggle_build_mode)
         self.build_mode_button.pack()
-        
+
         options = tk.Button(self.master, text="Optionen", command=self.options)
         options.place(anchor="w", y=1965, x=30)
 
         self.line_color = "green"
-        
+
         self.arrow = tk.Frame(self.master, relief="solid", borderwidth=5)
         self.arrow.pack(side=tk.RIGHT)
 
@@ -68,7 +68,7 @@ class Netzplaner:
         self.left_button.pack(side=tk.RIGHT)
         self.right_button = tk.Button(self.arrow, text="→", command=lambda: self.move_canvas(10, 0))
         self.right_button.pack(side=tk.RIGHT)
-        
+
 
 
         self.routebutton = tk.Button(self.master, text="Routenplaner öffnen", command=lambda start="", stop="": self.open_route_planner_window(start="", stop=""))
@@ -82,43 +82,43 @@ class Netzplaner:
         #self.master.bind("<A>", lambda event: self.move_canvas(-10, 0))
         #self.master.bind("<S>", lambda event: self.move_canvas(0, 10))
         #self.master.bind("<D>", lambda event: self.move_canvas(10, 0))
-        
+
         print("Das inizialisieren von Slimeline war erfolgreich!")
     def setOptions(self, canvasBG, uiBG):
-        
-        
+
+
         self.canvasBG = canvasBG
         messagebox.showinfo("Information", f"""Der Hintergrund des
         Netzplans wurde auf
          '{canvasBG}' gesetzt!""")
         self.master.update()
-       
-         
+
+
         self.master.configure(bg=f"{uiBG}")
         self.build_line.configure(bg=f"{uiBG}")
-        
+
         if uiBG == "black":
             self.left_button.config(bg="black", fg="white")
     def options(self):
         settings = tk.Toplevel(self.master)
-        
-        
+
+
         settings.title("Einstellungen")
         graphical = tk.LabelFrame(settings, text="Graphische Einstellungen", relief="solid", borderwidth=5)
         graphical.grid(row=0, column=0)
         canvasbgEntry = tk.Entry(graphical, width=10)
         canvasbgEntry.grid(row=0, column=1)
         canvasbgLabel = tk.Label(graphical, text="Hintergrund des Plans:")
-        
-        
+
+
         canvasbgLabel.grid(row=0, column=0)
         canvasbgEntry.insert(0, self.canvasBG)
         uiLabel = tk.Label(graphical, text="Hintergrund der Benutzeroberfläche:")
         uiLabel.grid(row=1, column=0)
         uiEntry = tk.Entry(graphical,  width=10)
         uiEntry.grid(row=1, column=1)
-        
-        
+
+
         confirmgraphical = tk.Button(graphical, text="Graphisches Bestätigen", command=lambda: self.setOptions(canvasBG=canvasbgEntry.get(), uiBG=uiEntry.get()))
         confirmgraphical.grid(row=10, column=1)
     def saveOrLoad(self):
@@ -128,7 +128,7 @@ class Netzplaner:
         SaveButton.pack()
         LoadButton = tk.Button(Auswahl, text="Laden", command=self.load_plan)
         LoadButton.pack()
-        
+
     def open_route_planner_window(self, start, stop):
         window = tk.Toplevel(self.master)
         window.title("Routenplaner")
@@ -147,7 +147,7 @@ class Netzplaner:
 
         calculate_button = tk.Button(window, text="Route berechnen", command=self.calculate_route)
         calculate_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
-        
+
 
     def calculate_route(self):
         start_station = self.start_entry.get()
@@ -173,8 +173,8 @@ class Netzplaner:
              {start_station} nach: 
             {end_station} beträgt
              {distances[end_station] + 1} Station(en).\nRoute:
-            	 {'''->
-            	  '''.join(path)}"""
+                     {'''->
+                      '''.join(path)}"""
             messagebox.showinfo("Information", route_info)
 
     def dijkstra(self, start_station):
@@ -267,42 +267,37 @@ class Netzplaner:
         (Merken Sie
         sich den Namen der Datei!)""")
         if filename:
-            if not filename.endswith(".pkl"):
-                filename += ".pkl"
-            with open(filename, "wb") as f:
-                pickle.dump((self.lines, self.stations), f)
-            with open("Bau " + filename, "wb") as build:
-                pickle.dump(self.bau, build)
+            if not filename.endswith(".json"):
+                filename += ".json"
+            with open(filename, mode="w", encoding="utf-8") as f:
+                json.dump((self.lines, self.stations, self.bau), f)
+            
             messagebox.showinfo("Gespeichert", f"Netzplan wurde als '{filename}' gespeichert.")
 
     def load_plan(self):
         filename = simpledialog.askstring("Laden", """Name der Datei, die geladen werden soll:
              """)
-             
+
         if filename:
-            if not filename.endswith(".pkl"):
-                filename += ".pkl"
+            if not filename.endswith(".json"):
+                filename += ".json"
             try:
-                with open(filename, "rb") as f:
-                    self.lines, self.stations = pickle.load(f)
+                with open(filename, mode="r", encoding="utf-8") as f:
+                    self.lines, self.stations, self.bau = json.load(f)
             except FileNotFoundError:
                 messagebox.showerror("Fehler", f"Datei '{filename}' wurde nicht gefunden.")
-            try:
-                with open("Bau " + filename, "rb") as build:
-                    self.bau = pickle.load(build)
-            except FileNotFoundError:
-                messagebox.showerror("Fehler", f"Datei 'Bau {filename}' wurde nicht gefunden.")
-                self.draw_lines()
-                string = f"Netzplan '{filename}' wurde geladen."
-                string = f"""{string} {self.stations}"""  #Dann wird self.stations angezeigt!
-                
-                '''self.stations = {
-                "Name der Station": koordinaten als int,
-                [...]
-                }'''
-                messagebox.showinfo("Geladen", string)
             
-                
+            self.draw_lines()
+            string = f"Netzplan '{filename}' wurde geladen."
+            string = f"""{string} {self.stations}"""  #Dann wird self.stations angezeigt!
+
+            '''self.stations = {
+            "Name der Station": koordinaten als int,
+            [...]
+            }'''
+            messagebox.showinfo("Geladen", string)
+
+
 
     def draw_lines(self):
         self.canvas.delete("all")
@@ -333,14 +328,14 @@ class Netzplaner:
     def showListOfAllStations(self):
         list = tk.Toplevel(self.master)
         list.title("Liste aller Stationen")
-        
-        
+
+
         varRow = 1
         varColumn = 0
-        
+
         #myScrollbar = tk.Scrollbar(list, orient="vertical")
         #myScrollbar.grid(row=1, column=4)
-        
+
         stops = sorted(self.stations)
         count = 0
         for stop in stops:
@@ -354,19 +349,19 @@ class Netzplaner:
                 varRow = 1
             count += 1
         list.title(f"Liste aller Stationen (insgesamt {count})")
-        
+
          #34 
     def rename(self,station):
         renameW = tk.Toplevel(self.master)
         renameW.title(f"{station} umbenennen")
-        
+
         ueberschrift = tk.Label(renameW, text=f"Wie soll {station} in Zukunft heissen")
         ueberschrift.pack()
-        
+
         newNameEntry = tk.Entry(renameW, width=50)
         newNameEntry.pack()
         newNameEntry.insert(0, f"{station}")
-        
+
         confirm = tk.Button(renameW, text="Bestätigen", command=lambda: self.Dorename(station=station, new=newNameEntry.get()))
 
 
@@ -430,7 +425,7 @@ class Netzplaner:
     def stopRouteFinding(self, stop_station):
         self.RouteFinder = False
         self.open_route_planner_window(start=self.start_station, stop=stop_station)
-        
+
     def startRouteFinding(self, start_station):
         self.RouteFinder = True
         self.start_station = start_station 
@@ -438,13 +433,13 @@ class Netzplaner:
     def stationWindow(self, station):
                 #self.bau ist ein dictionary welches die Bauprojekte zeigt
                 stationW = tk.Toplevel(self.master)
-                
+
                 name = tk.Label(stationW, text=f"Name: {station}")
                 name.pack()
-                
+
                 coords = tk.Label(stationW, text=f"Koordinaten: {self.stations[station]}")
                 coords.pack()
-                
+
                 renameButton = tk.Button(stationW, text=f"{station} umbenennen", command=lambda station=station: self.rename(station=station))
                 renameButton.pack()
                 deleteButton = tk.Button(stationW, text=f"{station} löschen", command=lambda station=station: self.confirmDeletion(station=station))
@@ -469,29 +464,4 @@ class Netzplaner:
                 self.addBuild.pack()
                 addBuildButton = tk.Button(stationW, text="Bauarbeit hinzufügen", command=lambda station=station: self.addWIP(station=station))
                 addBuildButton.pack()
-                ripBuildButton = tk.Button(stationW, text="Bauprojekt beenden", command=lambda station=station: self.ripWIP(station=station))
-                ripBuildButton.pack()
-                        
-    def addWIP(self, station):
-        newWIP = self.addBuild.get()
-        if station in self.bau:
-            self.bau[station].append(newWIP)
-        else:
-            self.bau.update({station: [newWIP]})
-    def ripWIP(self, station):
-              rip = simpledialog.askstring("Bauarbeiten beenden", "Welches Bauprojekt möchtest du beenden?")
-              if rip in self.bau[station]:
-                  self.bau[station].remove(rip)
-              else:
-                  messagebox.showerror("Fehler", f"Es gibt die Bauarbeit oder das Bauprojekt {rip} nicht!")
-              
-    def run(self):
-        self.draw_lines()
-        self.master.mainloop()
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    netzplaner = Netzplaner(root)
-    netzplaner.run()
-
-        
+                ripBuildButton = tk.Button(stationW, text="Bauprojekt beenden", command=lambda station=stati

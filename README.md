@@ -102,4 +102,5 @@ Für ein schnelles und effizientes Arbeiten lässt sich Slimeline fast vollstän
 
     Zweigeteilte Stationsnamen: Unterstützung für das |-Symbol im Stationsnamen, um zweizeilige Beschriftungen und Untertitel auf dem Plan zu erzeugen.
 
-_Hinweis: Beim ersten Start versucht die Anwendung, ihr Icon von GitHub herunterzuladen und erstellt notwendige Konfigurationsdateien im lokalen Verzeichnis._
+
+Hinweis: Beim ersten Start versucht die Anwendung, ihr Icon von GitHub herunterzuladen und erstellt notwendige Konfigurationsdateien im lokalen Verzeichnis.

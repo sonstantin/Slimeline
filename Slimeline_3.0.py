@@ -5,7 +5,11 @@ from tkinter import colorchooser, simpledialog, messagebox, filedialog
 import json
 from PIL import Image
 import requests
-import sys, os, pyperclip
+import sys, os
+try:
+    import pyperclip
+except ModuleNotFoundError:
+    print("Pyperclip not found!")
 from datetime import datetime
 import math
 
@@ -1474,7 +1478,6 @@ try:
     if __name__ == "__main__":
         root = tk.Tk()
         netzplaner = Netzplaner(root)
-
         netzplaner.run()
 
 except Exception as e:
@@ -1482,8 +1485,14 @@ except Exception as e:
     exc_type, exc_value, exc_tb = sys.exc_info()
     tb = traceback.extract_tb(exc_tb)
     last_call = tb[-1]
-    pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    try:
+        pyperclip.copy("https://github.com/sonstantin/Slimeline/issues")
+    except ModuleNotFoundError:
+        print("Using Pydroid?")
     messagebox.showerror("Error", f"{e}\n\n\n Place: {last_call}\n\n\nPlease report the error here. \nWe copied the link in your clipboard. If you press 'OK', \nwe will copy the Error in your clipboard:\nhttps://github.com/sonstantin/Slimeline/issues")
-    pyperclip.copy(f"""Version {self.version}
-    Datum: {datetime.date}
-    Fehler: {e}""")
+    try:
+        pyperclip.copy(f"""Version {self.version}
+        Datum: {datetime.date}
+        Fehler: {e}""")
+    except ModuleNotFoundError:
+        print("If you are not using Pydroid, you can install pyperclip")

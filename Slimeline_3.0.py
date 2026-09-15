@@ -12,6 +12,7 @@ except ModuleNotFoundError:
     print("Pyperclip not found!")
 from datetime import datetime
 import math
+import html
 
 
 
@@ -21,7 +22,7 @@ try:
     class Netzplaner:
         def __init__(self, master):
             print("============Slimeline============")
-            self.version = 2.3
+            self.version = 3.0
 
             self.dirname = os.path.dirname(__file__)
 
@@ -317,7 +318,9 @@ try:
             self.end_entry.insert(0, stop)
 
             calculate_button = tk.Button(window, text=self.strings["Route berechnen"], command=self.calculate_route)
-            calculate_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+            calculate_button.grid(row=3, column=1, padx=10, pady=10)
+
+            tk.Button(window, text=self.strings["Alle Routen berechnen"],command=self.calculate_all_routes).grid(row=3,column=0)
 
         def lists(self):
             ask = tk.Toplevel(self.master)
@@ -352,6 +355,104 @@ try:
                         return int(t)
             return 0
 
+        def calculate_all_routes(self):
+            all_routes = {}
+
+            for start_station in self.stations:
+                (distances, previous_stations, previous_lines,
+                segment_times, wait_times) = self.dijkstra(start_station)
+                
+                all_routes[start_station] = {}
+
+                for end_station in self.stations:
+                    if start_station == end_station or distances[end_station] == float('inf'):
+                        continue
+
+                    # Route vom Endpunkt zum Startpunkt rekonstruieren
+                    path = []
+                    curr = end_station
+                    while curr is not None:
+                        path.insert(0, curr)
+                        curr = previous_stations.get(curr)
+
+                    if len(path) < 2:
+                        continue
+
+                    # Routensegmente nach genutzten Linien gruppieren
+                    legs = []
+                    current_leg = []
+                    current_line = None
+
+                    for i in range(1, len(path)):
+                        prev_st = path[i - 1]
+                        curr_st = path[i]
+                        line_info = previous_lines.get(curr_st) # Enthält (line_name, color)
+                        line_name, line_color = line_info if line_info else (self.strings["Unbekannt"], "#000000")
+
+                        if line_name != current_line:
+                            if current_leg:
+                                legs.append(current_leg)
+                            current_line = line_name
+                            # leg enthält: [line_name, line_color, Startstation, Station1, ...]
+                            current_leg = [line_name, line_color, prev_st, curr_st]
+                        else:
+                            current_leg.append(curr_st)
+
+                    if current_leg:
+                        legs.append(current_leg)
+
+                    all_routes[start_station][end_station] = legs
+
+            # Ausgabe der gesamten Routenstruktur im Terminal als JSON
+            print(json.dumps(all_routes, indent=4, ensure_ascii=False))
+
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".html",
+                filetypes=[(self.strings["HTML-Dateien"], "*.html"), (self.strings["Alle Dateien"], "*.*")]
+            )
+
+            if filename:
+                with open(filename, mode="w", encoding="utf-8") as f:
+                    # HTML Header mit Basis-Styling
+                    f.write("""<!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="utf-8">
+            <title>Routenübersicht</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 30px; line-height: 1.5; background-color: #f9f9f9; }
+                h1 { color: #2c3e50; border-bottom: 3px solid #34495e; padding-bottom: 10px; }
+                h2 { color: #16a085; margin-top: 30px; font-size: 1.4em; }
+                h3 { color: #333; margin-bottom: 5px; font-size: 1.1em; font-weight: bold; }
+                .route-card { background: white; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+                .leg { font-weight: bold; margin: 4px 0; font-size: 1em; }
+            </style>
+            </head>
+            <body>
+            <h1>Routenübersicht aller Verbindungen</h1>
+            """.replace("Routenübersicht aller Verbindungen", self.strings["Routenübersicht aller Verbindungen"]).replace("Routenübersicht", self.strings["Routenübersicht"]))
+
+                    for start_station, destinations in all_routes.items():
+                        f.write(f"<h2>Startstation: {html.escape(start_station)}</h2>\n".replace("Startstation", self.strings["Start"]))
+                        
+                        for end_station, legs in destinations.items():
+                            f.write('<div class="route-card">\n')
+                            f.write(f"  <h3>Ziel: {html.escape(end_station)}</h3>\n".replace("Ziel", self.strings["Ziel"]))
+                            
+                            for leg in legs:
+                                line_name = leg[0]
+                                line_color = leg[1]
+                                stations = " &rarr; ".join(leg[2:])
+                                
+                                # Linienname und Weg in der jeweiligen Linienfarbe
+                                f.write(f'  <div class="leg" style="color: {line_color};">')
+                                f.write(f'Linie {html.escape(line_name)}: {stations}')
+                                f.write('</div>\n')
+                            
+                            f.write('</div>\n')
+
+                    f.write("</body>\n</html>")
+                    
 
         def calculate_route(self):
             start_station = self.start_entry.get()
@@ -469,12 +570,12 @@ try:
 
                 text_parts = []
                 if i > 0 and lines_used[i]:
-                    line_name, color = lines_used[i]
+                    line_name, color = lines_used[i] # HIER
                     text_parts.append(("→", "black"))
-                    text_parts.append((f"[{line_name}", color))
+                    text_parts.append((f"[{line_name}", color)) # HIER
 
                     duration = times_used[i]
-                    travel_time = self.get_travel_time(path[i-1], path[i], line_name)
+                    travel_time = self.get_travel_time(path[i-1], path[i], line_name) 
                     wait_time   = max(0, waits_used[i])        # <-- per-segment wait
 
                     parts = []
@@ -487,6 +588,7 @@ try:
                         parts.append(f"{wait_time // 60} min {wait_time % 60} s {self.strings['Warten']}")
 
                     time_str = f" ({' + '.join(parts)})" if parts else ""
+                    
                     text_parts[-1] = (text_parts[-1][0] + time_str + "]", color)
 
 
@@ -503,7 +605,7 @@ try:
                 else:
                     minuteLabel = self.strings["Minuten"]
 
-                text_parts.append((path[i], "black"))
+                text_parts.append((path[i], "red")) # HIER!
                 route_window,
                 title.config(text=(
                     f"{self.strings['Kürzeste Route von']} {start_station} {self.strings['nach']} {end_station}"
@@ -515,6 +617,7 @@ try:
                     tk.Label(segment_frame, text=text,
                             font=("Arial", 12), fg=color,
                             bg=segment_frame["bg"]).pack(side="left", padx=5)
+                print(text_parts)
 
 
 

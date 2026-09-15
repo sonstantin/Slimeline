@@ -430,7 +430,7 @@ try:
             </head>
             <body>
             <h1>Routenübersicht aller Verbindungen</h1>
-            """.replace("Routenübersicht aller Verbindungen", self.strings["Routenübersicht aller Verbindungen"]).replace("Routenübersicht", self.strings["Routenübersicht"]))
+            """.replace("Routenübersicht aller Verbindungen", self.strings["Routenübersicht aller Verbindungen"]).replace("Routenübersicht", self.strings["Routenübersicht"]).replace("Linie", self.strings["Linie"]))
 
                     for start_station, destinations in all_routes.items():
                         f.write(f"<h2>Startstation: {html.escape(start_station)}</h2>\n".replace("Startstation", self.strings["Start"]))

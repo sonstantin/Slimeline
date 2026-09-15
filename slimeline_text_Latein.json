@@ -119,5 +119,14 @@
     "Bauprojekt beenden": "Fine laborem",
     "Welches Bauprojekt möchtest du beenden?": "Quid laborem finere cupis?",
     "Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!": "Labor /rip non est!",
-    "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Tempus inter /new_points[i][2] et /new_points[i+1][2] (quam partes minutae secundae):"
+    "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Tempus inter /new_points[i][2] et /new_points[i+1][2] (quam partes minutae secundae):",
+
+    "Alle Routen berechnen": "Calcula itineres omnes",
+    "Unbekannt": "Ignotus",
+    "HTML-Dateien": "Scriptiones cum HTML",
+    "Alle Dateien": "Scriptiones omnes",
+    "Routenübersicht aller Verbindungen": "Schema de itineribus omnibus in consilio",
+    "Routenübersicht": "Schema de itineribus",
+    "Ziel": "Fines",
+    "Start": "Exorsus"
 }

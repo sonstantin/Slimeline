@@ -120,5 +120,14 @@
     "Bauprojekt beenden": "End building project",
     "Welches Bauprojekt möchtest du beenden?": "Which building project do you want to end?",
     "Es gibt die Bauarbeit oder das Bauprojekt /rip nicht!": "There is no Construction work called /rip!",
-    "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Time between /new_points[i][2] and /new_points[i+1][2] (in seconds):"
+    "Zeit zwischen /new_points[i][2] und /new_points[i+1][2] (in Sekunden):": "Time between /new_points[i][2] and /new_points[i+1][2] (in seconds):",
+
+    "Alle Routen berechnen": "Calculate all Routes",
+    "Unbekannt": "Unknown",
+    "HTML-Dateien": "HTML-Files",
+    "Alle Dateien": "All Files",
+    "Routenübersicht aller Verbindungen": "Overview about all routes in the network",
+    "Routenübersicht": "Overwiev about the routes",
+    "Ziel": "Destination",
+    "Start": "Start"
 }

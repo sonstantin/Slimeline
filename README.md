@@ -30,13 +30,14 @@ Installation der benötigten Pakete:
 pip install pillow requests pyperclip
 ```
 
-📁 Projektstruktur 
-Slimeline/
+## 📁 Projektstruktur 
+```Slimeline/
 │
 ├── Linewidth.json           # Speichert Linienbreite, Sprache und Zeitformat
 ├── slimeline_text_*.json    # Sprachdateien (z.B. slimeline_text_Englisch.json)
 ├── Slimeline.png            # Programm-Icon (wird bei Bedarf automatisch geladen)
 └── Slimeline_3.0.py         # Hauptanwendung
+```
 
 📝 **Datenformat**
 
@@ -61,7 +62,7 @@ Beispiel für den inneren Aufbau:
 }
 ```
 
-⌨️ Tastenkombinationen (Shortcuts)
+⌨️ **Tastenkombinationen (Shortcuts)**
 
 Für ein schnelles und effizientes Arbeiten lässt sich Slimeline fast vollständig über die Tastatur steuern:
 
@@ -95,13 +96,15 @@ Für ein schnelles und effizientes Arbeiten lässt sich Slimeline fast vollstän
 
     Pfeiltasten (bzw. WASD, falls aktiv) : Netzplan-Ausschnitt verschieben
 
-🖥️ Features der Oberfläche
+🖥️ **Features der Oberfläche**
 
     Multi-Fenster-System: Detailmenüs für Stationen und Linien öffnen sich in übersichtlichen, separaten Fenstern (Toplevel).
 
-    Fokus-Modus (Highlighting): Bei Auswahl einer Linie werden alle anderen Linien auf dem Canvas ausgegraut, um den Verlauf der ausgewählten Linie visuell hervorzuheben.
+*Fokus-Modus (Highlighting):*
+Bei Auswahl einer Linie werden alle anderen Linien auf dem Canvas ausgegraut, um den Verlauf der ausgewählten Linie visuell hervorzuheben.
 
-    Zweigeteilte Stationsnamen: Unterstützung für das |-Symbol im Stationsnamen, um zweizeilige Beschriftungen und Untertitel auf dem Plan zu erzeugen.
+ *Zweigeteilte Stationsnamen:*
+    Unterstützung für das |-Symbol im Stationsnamen, um zweizeilige Beschriftungen und Untertitel auf dem Plan zu erzeugen.
 
 
-Hinweis: Beim ersten Start versucht die Anwendung, ihr Icon von GitHub herunterzuladen und erstellt notwendige Konfigurationsdateien im lokalen Verzeichnis.
+*Hinweis:* Beim ersten Start versucht die Anwendung, ihr Icon von GitHub herunterzuladen und erstellt notwendige Konfigurationsdateien im lokalen Verzeichnis.

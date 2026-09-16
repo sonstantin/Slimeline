@@ -27,7 +27,7 @@ Das Projekt verwendet folgende Python-Bibliotheken:
 
 Installation der benötigten Pakete:
 ```bash
-pip install pillow requests pyperclip```
+pip install pillow requests pyperclip ```
 
 📁 Projektstruktur
 Slimeline/

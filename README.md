@@ -96,9 +96,11 @@ Für ein schnelles und effizientes Arbeiten lässt sich Slimeline fast vollstän
 
     Pfeiltasten (bzw. WASD, falls aktiv) : Netzplan-Ausschnitt verschieben
 
+
 🖥️ **Features der Oberfläche**
 
-    Multi-Fenster-System: Detailmenüs für Stationen und Linien öffnen sich in übersichtlichen, separaten Fenstern (Toplevel).
+*Multi-Fenster-System:*
+Detailmenüs für Stationen und Linien öffnen sich in übersichtlichen, separaten Fenstern (Toplevel).
 
 *Fokus-Modus (Highlighting):*
 Bei Auswahl einer Linie werden alle anderen Linien auf dem Canvas ausgegraut, um den Verlauf der ausgewählten Linie visuell hervorzuheben.

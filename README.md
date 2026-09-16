@@ -30,7 +30,7 @@ Installation der benötigten Pakete:
 pip install pillow requests pyperclip
 ```
 
-📁 Projektstruktur
+📁 Projektstruktur 
 Slimeline/
 │
 ├── Linewidth.json           # Speichert Linienbreite, Sprache und Zeitformat
@@ -38,12 +38,11 @@ Slimeline/
 ├── Slimeline.png            # Programm-Icon (wird bei Bedarf automatisch geladen)
 └── Slimeline_3.0.py         # Hauptanwendung
 
-📝 Datenformat
+📝 **Datenformat**
 
 Netzpläne werden als strukturierte JSON-Dateien gespeichert.
 Beispiel für den inneren Aufbau:
-
-{
+```{
     "lines": [
         [
             ["U1", 1, ["600"]],
@@ -60,6 +59,7 @@ Beispiel für den inneren Aufbau:
         "Hauptbahnhof": ["Gleiserneuerung"]
     }
 }
+```
 
 ⌨️ Tastenkombinationen (Shortcuts)
 
